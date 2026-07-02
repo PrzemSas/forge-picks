@@ -64,7 +64,7 @@ The badge flips from **● Demo replay** to **● Live data**.
 
 - [x] Public repo
 - [x] Deployed URL — <https://forge-picks.vercel.app>
-- [ ] Live TxLINE data (`.env` + Phantom)
+- [x] Live TxLINE data (devnet — real World Cup feed, on-chain subscription)
 - [ ] Demo video ≤ 5 min (Loom/YouTube)
 - [ ] Brief doc: idea + TxLINE endpoints + API feedback
 - [ ] Submit on Earn → **Consumer & Fan Experiences**
