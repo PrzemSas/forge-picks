@@ -126,6 +126,17 @@ export default function App() {
     localStorage.setItem('forge-picks', JSON.stringify(picks))
   }, [picks])
 
+  // ?demo[=seconds] → auto-start the demo clock (shareable live-looking link / screenshots)
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search)
+    if (p.has('demo') && !localStorage.getItem('forge-kickoff')) {
+      const secs = Number(p.get('demo')) || 70
+      const t = Date.now() - secs * 1000
+      localStorage.setItem('forge-kickoff', String(t))
+      setKickoffAt(t)
+    }
+  }, [])
+
   // Goal detection -> banner (with scorer) + hero flash.
   useEffect(() => {
     const prev = prevScoresRef.current

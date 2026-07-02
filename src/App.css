@@ -1,5 +1,6 @@
 :root {
   /* GorWeld brand — steel, torch flame, welding arc, spark */
+  color-scheme: dark;
   --bg: #0a0a0a;
   --bg2: #0c0f12;
   --steel: #1a1d21;
@@ -43,6 +44,7 @@ header h1,
 header h1 {
   margin: 0.25rem 0;
   font-size: 2.4rem;
+  color: #fff;
   text-shadow: 0 0 24px rgba(255, 106, 0, 0.35);
 }
 
