@@ -62,6 +62,10 @@ export default function App() {
     }
   })
   const [txlineOk, setTxlineOk] = useState(false)
+  const [kickoffAt, setKickoffAt] = useState<number | null>(() => {
+    const v = localStorage.getItem('forge-kickoff')
+    return v ? Number(v) : null
+  })
 
   // animation state
   const prevScoresRef = useRef<Record<string, Score>>({})
@@ -94,7 +98,8 @@ export default function App() {
       const entries = await Promise.all(
         fixtures.map(async (f) => {
           try {
-            const r = await fetch(`${API}/scores/${f.id}`)
+            const q = f.id === LIVE_ID && kickoffAt ? `?t=${kickoffAt}` : ''
+            const r = await fetch(`${API}/scores/${f.id}${q}`)
             const d = await r.json()
             return [f.id, d.score as Score] as const
           } catch {
@@ -115,7 +120,7 @@ export default function App() {
       alive = false
       clearInterval(t)
     }
-  }, [fixtures])
+  }, [fixtures, kickoffAt])
 
   useEffect(() => {
     localStorage.setItem('forge-picks', JSON.stringify(picks))
@@ -152,11 +157,14 @@ export default function App() {
   }, [scores, picks])
 
   const kickoff = useCallback(() => {
-    fetch(`${API}/live/kickoff`, { method: 'POST' }).catch(console.error)
+    const t = Date.now()
+    localStorage.setItem('forge-kickoff', String(t))
+    setKickoffAt(t)
   }, [])
 
   const resetDemo = useCallback(() => {
-    fetch(`${API}/live/reset`, { method: 'POST' }).catch(console.error)
+    localStorage.removeItem('forge-kickoff')
+    setKickoffAt(null)
   }, [])
 
   const selected = fixtures.find((f) => f.id === selectedId) ?? null
@@ -339,7 +347,7 @@ export default function App() {
 
               {selected.id === LIVE_ID && !txlineOk && (
                 <div className="demo-controls">
-                  {(selectedScore?.status ?? 'scheduled') === 'scheduled' ? (
+                  {!kickoffAt ? (
                     <button type="button" className="kickoff" onClick={kickoff}>
                       ▶ Kick off (demo)
                     </button>
