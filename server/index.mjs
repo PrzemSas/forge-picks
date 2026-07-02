@@ -101,7 +101,7 @@ function normalizeScores(payload) {
       minute = Math.max(minute, e.dataSoccer.Minutes)
     }
   }
-  return { home, away, minute, status: mapSoccerStatus(statusKey) }
+  return { home, away, minute, status: mapSoccerStatus(statusKey), goals: [] }
 }
 
 // --- Fixtures ---------------------------------------------------------------
@@ -145,9 +145,9 @@ app.get('/api/scores/:fixtureId', async (req, res) => {
 const LIVE_ID = 'wc-r16-2'
 const MATCH_SECONDS = 90
 const LIVE_GOALS = [
-  { minute: 12, side: 'home' },
-  { minute: 34, side: 'away' },
-  { minute: 67, side: 'home' },
+  { minute: 12, side: 'home', scorer: 'Florian Wirtz' },
+  { minute: 34, side: 'away', scorer: 'Antonio Sanabria' },
+  { minute: 67, side: 'home', scorer: 'Jamal Musiala' },
 ]
 let liveStartedAt = null
 
@@ -162,31 +162,52 @@ app.post('/api/live/reset', (_req, res) => {
 })
 
 function liveMatch() {
-  if (!liveStartedAt) return { home: 0, away: 0, minute: 0, status: 'scheduled' }
+  if (!liveStartedAt) return { home: 0, away: 0, minute: 0, status: 'scheduled', goals: [] }
   const elapsed = (Date.now() - liveStartedAt) / 1000
   const minute = Math.max(0, Math.min(90, Math.floor((elapsed / MATCH_SECONDS) * 90)))
-  const home = LIVE_GOALS.filter((g) => g.side === 'home' && g.minute <= minute).length
-  const away = LIVE_GOALS.filter((g) => g.side === 'away' && g.minute <= minute).length
-  return { home, away, minute, status: minute >= 90 ? 'finished' : 'live' }
+  const goals = LIVE_GOALS.filter((g) => g.minute <= minute)
+  const home = goals.filter((g) => g.side === 'home').length
+  const away = goals.filter((g) => g.side === 'away').length
+  return { home, away, minute, status: minute >= 90 ? 'finished' : 'live', goals }
 }
 
 function mockScore(fixtureId) {
   if (fixtureId === LIVE_ID) return liveMatch()
   const finals = {
-    'wc-r32-1': { home: 2, away: 1, minute: 90, status: 'finished' },
-    'wc-r32-2': { home: 3, away: 0, minute: 90, status: 'finished' },
+    'wc-r32-1': {
+      home: 2,
+      away: 1,
+      minute: 90,
+      status: 'finished',
+      goals: [
+        { minute: 23, side: 'home', scorer: 'Santiago Giménez' },
+        { minute: 51, side: 'away', scorer: 'Enner Valencia' },
+        { minute: 78, side: 'home', scorer: 'Hirving Lozano' },
+      ],
+    },
+    'wc-r32-2': {
+      home: 3,
+      away: 0,
+      minute: 90,
+      status: 'finished',
+      goals: [
+        { minute: 15, side: 'home', scorer: 'Harry Kane' },
+        { minute: 40, side: 'home', scorer: 'Bukayo Saka' },
+        { minute: 62, side: 'home', scorer: 'Phil Foden' },
+      ],
+    },
   }
-  return finals[fixtureId] ?? { home: 0, away: 0, minute: 0, status: 'scheduled' }
+  return finals[fixtureId] ?? { home: 0, away: 0, minute: 0, status: 'scheduled', goals: [] }
 }
 
-// Mock = real WC 2026 knockout teams (Poland did NOT qualify). Dates ~ Jul 2026.
+// Mock = real WC 2026 knockout teams + real host venues (Poland did NOT qualify).
 function mockFixtures() {
   return [
-    { id: 'wc-r16-2', home: 'Germany', away: 'Paraguay', kickoff: '2026-07-02T18:00:00Z', status: 'live', round: 'Round of 16' },
-    { id: 'wc-r16-1', home: 'France', away: 'Sweden', kickoff: '2026-07-04T20:00:00Z', status: 'scheduled', round: 'Round of 16' },
-    { id: 'wc-r16-3', home: 'United States', away: 'Bosnia and Herzegovina', kickoff: '2026-07-05T22:00:00Z', status: 'scheduled', round: 'Round of 16' },
-    { id: 'wc-r32-1', home: 'Mexico', away: 'Ecuador', kickoff: '2026-06-29T22:00:00Z', status: 'finished', round: 'Round of 32' },
-    { id: 'wc-r32-2', home: 'England', away: 'DR Congo', kickoff: '2026-06-30T19:00:00Z', status: 'finished', round: 'Round of 32' },
+    { id: 'wc-r16-2', home: 'Germany', away: 'Paraguay', kickoff: '2026-07-02T18:00:00Z', status: 'live', round: 'Round of 16', venue: 'MetLife Stadium, New York/NJ' },
+    { id: 'wc-r16-1', home: 'France', away: 'Sweden', kickoff: '2026-07-04T20:00:00Z', status: 'scheduled', round: 'Round of 16', venue: 'SoFi Stadium, Los Angeles' },
+    { id: 'wc-r16-3', home: 'United States', away: 'Bosnia and Herzegovina', kickoff: '2026-07-05T22:00:00Z', status: 'scheduled', round: 'Round of 16', venue: 'AT&T Stadium, Dallas' },
+    { id: 'wc-r32-1', home: 'Mexico', away: 'Ecuador', kickoff: '2026-06-29T22:00:00Z', status: 'finished', round: 'Round of 32', venue: 'Estadio Azteca, Mexico City' },
+    { id: 'wc-r32-2', home: 'England', away: 'DR Congo', kickoff: '2026-06-30T19:00:00Z', status: 'finished', round: 'Round of 32', venue: 'Mercedes-Benz Stadium, Atlanta' },
   ]
 }
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { flagUrl } from './teams'
 
@@ -9,13 +9,17 @@ type Fixture = {
   kickoff: string
   status: string
   round?: string
+  venue?: string
 }
+
+type Goal = { minute: number; side: 'home' | 'away'; scorer: string }
 
 type Score = {
   home: number
   away: number
   minute: number
   status: 'scheduled' | 'live' | 'finished'
+  goals?: Goal[]
 }
 
 type Outcome = 'home' | 'away' | 'draw'
@@ -58,6 +62,13 @@ export default function App() {
     }
   })
   const [txlineOk, setTxlineOk] = useState(false)
+
+  // animation state
+  const prevScoresRef = useRef<Record<string, Score>>({})
+  const goalTimer = useRef<number | undefined>(undefined)
+  const [goal, setGoal] = useState<{ team: string; minute: number; scorer?: string } | null>(null)
+  const celebrated = useRef<Set<string>>(new Set())
+  const [celebrate, setCelebrate] = useState(false)
 
   useEffect(() => {
     fetch(`${API}/health`)
@@ -110,6 +121,36 @@ export default function App() {
     localStorage.setItem('forge-picks', JSON.stringify(picks))
   }, [picks])
 
+  // Goal detection -> banner (with scorer) + hero flash.
+  useEffect(() => {
+    const prev = prevScoresRef.current
+    for (const f of fixtures) {
+      const p = prev[f.id]
+      const c = scores[f.id]
+      if (!c || !p) continue
+      if (c.home > p.home || c.away > p.away) {
+        const side = c.home > p.home ? 'home' : 'away'
+        const last = (c.goals ?? []).filter((g) => g.side === side).slice(-1)[0]
+        setGoal({ team: side === 'home' ? f.home : f.away, minute: last?.minute ?? c.minute, scorer: last?.scorer })
+        window.clearTimeout(goalTimer.current)
+        goalTimer.current = window.setTimeout(() => setGoal(null), 2600)
+      }
+    }
+    prevScoresRef.current = scores
+  }, [scores, fixtures])
+
+  // Correct-pick celebration -> +10 floater (once per pick).
+  useEffect(() => {
+    for (const p of picks) {
+      const out = outcomeOf(scores[p.fixtureId])
+      if (out && out === p.choice && !celebrated.current.has(p.fixtureId)) {
+        celebrated.current.add(p.fixtureId)
+        setCelebrate(true)
+        window.setTimeout(() => setCelebrate(false), 1400)
+      }
+    }
+  }, [scores, picks])
+
   const kickoff = useCallback(() => {
     fetch(`${API}/live/kickoff`, { method: 'POST' }).catch(console.error)
   }, [])
@@ -153,6 +194,8 @@ export default function App() {
     return rows.sort((a, b) => b.points - a.points)
   }, [scores, myPoints])
 
+  const nextUp = fixtures.filter((f) => (scores[f.id]?.status ?? f.status) === 'scheduled')
+
   return (
     <div className="app">
       <header>
@@ -165,7 +208,12 @@ export default function App() {
       </header>
 
       {featured && (
-        <section className={`hero ${fStatus}`}>
+        <section className={`hero ${fStatus} ${goal ? 'flash' : ''}`}>
+          {goal && (
+            <div className="goal-banner">
+              ⚽ GOAL {goal.minute}' — {goal.scorer ? `${goal.scorer} (${goal.team})` : goal.team}
+            </div>
+          )}
           <div className="hero-tag">
             {fStatus === 'live' ? `● LIVE · ${fScore?.minute}'` : fStatus === 'finished' ? 'FULL TIME' : 'UP NEXT'}
             {featured.round ? <span className="hero-comp"> · {featured.round}</span> : null}
@@ -176,9 +224,9 @@ export default function App() {
               <span>{featured.home}</span>
             </div>
             <div className="hero-score">
-              <span>{fScore?.home ?? 0}</span>
+              <span key={`h-${fScore?.home ?? 0}`}>{fScore?.home ?? 0}</span>
               <i>:</i>
-              <span>{fScore?.away ?? 0}</span>
+              <span key={`a-${fScore?.away ?? 0}`}>{fScore?.away ?? 0}</span>
             </div>
             <div className="hero-team away">
               <span>{featured.away}</span>
@@ -188,6 +236,7 @@ export default function App() {
           <div className="hero-bar">
             <div style={{ width: `${Math.min(100, ((fScore?.minute ?? 0) / 90) * 100)}%` }} />
           </div>
+          {featured.venue && <div className="hero-venue">📍 {featured.venue}</div>}
           <div className="hero-pick">
             {fPick ? (
               <>
@@ -231,6 +280,7 @@ export default function App() {
                       {f.round ? `${f.round} · ` : ''}
                       {live ? `${s!.minute}'` : s?.status === 'finished' ? 'FT' : 'Upcoming'}
                     </span>
+                    {f.venue && <span className="venue-sm">📍 {f.venue}</span>}
                   </button>
                 </li>
               )
@@ -245,12 +295,13 @@ export default function App() {
               <p className="matchline">
                 {selected.home} <span className="vs">vs</span> {selected.away}
               </p>
+              {selected.venue && <p className="venue">📍 {selected.venue}</p>}
 
               <div className={`scoreboard ${selectedScore?.status ?? 'scheduled'}`}>
                 <Flag name={selected.home} size="w40" />
-                <span className="big">{selectedScore?.home ?? 0}</span>
+                <span className="big" key={`sh-${selectedScore?.home ?? 0}`}>{selectedScore?.home ?? 0}</span>
                 <span className="sep">:</span>
-                <span className="big">{selectedScore?.away ?? 0}</span>
+                <span className="big" key={`sa-${selectedScore?.away ?? 0}`}>{selectedScore?.away ?? 0}</span>
                 <Flag name={selected.away} size="w40" />
                 <span className="clock">
                   {selectedScore?.status === 'live'
@@ -260,6 +311,19 @@ export default function App() {
                       : 'Not started'}
                 </span>
               </div>
+
+              {selectedScore?.goals && selectedScore.goals.length > 0 && (
+                <ul className="goals">
+                  {selectedScore.goals.map((g, i) => (
+                    <li key={i}>
+                      <span className="g-min">{g.minute}'</span>
+                      <span className="g-ball">⚽</span>
+                      <span className="g-scorer">{g.scorer}</span>
+                      <Flag name={g.side === 'home' ? selected.home : selected.away} size="w20" />
+                    </li>
+                  ))}
+                </ul>
+              )}
 
               {selected.id === LIVE_ID && selectedScore?.status === 'scheduled' && !txlineOk && (
                 <button type="button" className="kickoff" onClick={kickoff}>
@@ -298,7 +362,8 @@ export default function App() {
           )}
         </section>
 
-        <section className="panel">
+        <section className="panel board-panel">
+          {celebrate && <span className="plus-ten">+10 ⚒</span>}
           <h2>Forge Board</h2>
           <ol className="board">
             {leaderboard.map((row, i) => (
@@ -309,7 +374,19 @@ export default function App() {
               </li>
             ))}
           </ol>
-          <p className="hint small">Board reshuffles the moment a match hits full time.</p>
+          {nextUp.length > 0 && (
+            <div className="next-up">
+              <h3>Next up</h3>
+              <ul>
+                {nextUp.map((f) => (
+                  <li key={f.id}>
+                    <Flag name={f.home} size="w20" /> {f.home} v {f.away} <Flag name={f.away} size="w20" />
+                    {f.venue && <span className="nv">📍 {f.venue}</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
       </main>
     </div>
