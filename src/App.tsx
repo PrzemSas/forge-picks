@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import './App.css'
+import { flagUrl } from './teams'
 
 type Fixture = {
   id: string
@@ -37,6 +38,12 @@ function outcomeOf(s: Score | undefined): Outcome | null {
   if (s.home > s.away) return 'home'
   if (s.away > s.home) return 'away'
   return 'draw'
+}
+
+function Flag({ name, size = 'w40' }: { name: string; size?: 'w20' | 'w40' | 'w80' | 'w160' }) {
+  const url = flagUrl(name, size)
+  if (!url) return <span className="flag flag-blank" aria-hidden />
+  return <img className="flag" src={url} alt="" loading="lazy" />
 }
 
 export default function App() {
@@ -111,6 +118,16 @@ export default function App() {
   const selectedScore = selected ? scores[selectedId!] : undefined
   const myPick = picks.find((p) => p.fixtureId === selectedId)
 
+  // Hero = the live match if any, else the selected/first fixture.
+  const featured = fixtures.find((f) => scores[f.id]?.status === 'live') ?? selected ?? fixtures[0] ?? null
+  const fScore = featured ? scores[featured.id] : undefined
+  const fStatus = fScore?.status ?? 'scheduled'
+  const fPick = featured ? picks.find((p) => p.fixtureId === featured.id) : undefined
+
+  function teamOf(fx: Fixture, choice: Outcome) {
+    return choice === 'home' ? fx.home : choice === 'away' ? fx.away : 'Draw'
+  }
+
   function makePick(choice: Outcome) {
     if (!selected) return
     const s = scores[selected.id]
@@ -139,16 +156,50 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <p className="eyebrow">World Cup · Consumer &amp; Fan Experiences</p>
+        <p className="eyebrow">World Cup 2026 · Fan Picks</p>
         <h1>🔥 Forge Picks</h1>
         <p className="sub">
           Live World Cup data via TxLINE · call the outcome · climb the forge board as the match burns.
         </p>
-        <p className="note">Poland did not qualify — mock uses real WC 2026 knockout teams only.</p>
-        <span className={`badge ${txlineOk ? 'live' : 'mock'}`}>
-          {txlineOk ? '● TxLINE live' : '● Mock mode — add .env tokens'}
-        </span>
+        <span className={`badge ${txlineOk ? 'live' : 'mock'}`}>{txlineOk ? '● Live data' : '● Demo replay'}</span>
       </header>
+
+      {featured && (
+        <section className={`hero ${fStatus}`}>
+          <div className="hero-tag">
+            {fStatus === 'live' ? `● LIVE · ${fScore?.minute}'` : fStatus === 'finished' ? 'FULL TIME' : 'UP NEXT'}
+            {featured.round ? <span className="hero-comp"> · {featured.round}</span> : null}
+          </div>
+          <div className="hero-match">
+            <div className="hero-team">
+              <Flag name={featured.home} size="w80" />
+              <span>{featured.home}</span>
+            </div>
+            <div className="hero-score">
+              <span>{fScore?.home ?? 0}</span>
+              <i>:</i>
+              <span>{fScore?.away ?? 0}</span>
+            </div>
+            <div className="hero-team away">
+              <span>{featured.away}</span>
+              <Flag name={featured.away} size="w80" />
+            </div>
+          </div>
+          <div className="hero-bar">
+            <div style={{ width: `${Math.min(100, ((fScore?.minute ?? 0) / 90) * 100)}%` }} />
+          </div>
+          <div className="hero-pick">
+            {fPick ? (
+              <>
+                Your pick: <strong>{teamOf(featured, fPick.choice)}</strong>
+                {fStatus === 'finished' ? (outcomeOf(fScore) === fPick.choice ? ' ✓' : ' ✗') : ' · locked in'}
+              </>
+            ) : (
+              'Make your pick below ↓'
+            )}
+          </div>
+        </section>
+      )}
 
       <main className="grid">
         <section className="panel">
@@ -166,7 +217,8 @@ export default function App() {
                   >
                     <span className="row1">
                       <span className="teams">
-                        {f.home} vs {f.away}
+                        <Flag name={f.home} size="w20" /> {f.home} <span className="vs">v</span> {f.away}{' '}
+                        <Flag name={f.away} size="w20" />
                       </span>
                       {s && s.status !== 'scheduled' ? (
                         <span className="mini-score">
@@ -177,7 +229,7 @@ export default function App() {
                     </span>
                     <span className="meta">
                       {f.round ? `${f.round} · ` : ''}
-                      {live ? `${s!.minute}'` : s?.status === 'finished' ? 'FT' : f.status}
+                      {live ? `${s!.minute}'` : s?.status === 'finished' ? 'FT' : 'Upcoming'}
                     </span>
                   </button>
                 </li>
@@ -186,7 +238,7 @@ export default function App() {
           </ul>
         </section>
 
-        <section className="panel">
+        <section className="panel pick-panel">
           <h2>Pick</h2>
           {selected ? (
             <>
@@ -195,9 +247,11 @@ export default function App() {
               </p>
 
               <div className={`scoreboard ${selectedScore?.status ?? 'scheduled'}`}>
+                <Flag name={selected.home} size="w40" />
                 <span className="big">{selectedScore?.home ?? 0}</span>
                 <span className="sep">:</span>
                 <span className="big">{selectedScore?.away ?? 0}</span>
+                <Flag name={selected.away} size="w40" />
                 <span className="clock">
                   {selectedScore?.status === 'live'
                     ? `${selectedScore.minute}'`
@@ -235,9 +289,7 @@ export default function App() {
                     <p className="verdict loss">✖ Missed this one</p>
                   )
                 ) : (
-                  <p className="hint">
-                    Pick locked in. Points forge when the match ends.
-                  </p>
+                  <p className="hint">Pick locked in. Points forge when the match ends.</p>
                 ))}
               {!myPick && <p className="hint">Tap a side to stake your call.</p>}
             </>

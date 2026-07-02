@@ -22,7 +22,16 @@ body {
   margin: 0;
   background: radial-gradient(ellipse at top, #12161b, var(--bg) 60%);
   color: var(--text);
-  font-family: system-ui, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+header h1,
+.panel h2,
+.eyebrow,
+.hero-tag,
+.hero-score,
+.scoreboard .big {
+  font-family: 'Chakra Petch', system-ui, sans-serif;
 }
 
 .app {
@@ -329,4 +338,146 @@ header h1 {
 .hint.small {
   font-size: 0.75rem;
   margin-bottom: 0;
+}
+
+/* --- flags --- */
+.flag {
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  vertical-align: middle;
+  height: auto;
+}
+
+.flag-blank {
+  display: inline-block;
+  width: 20px;
+  height: 14px;
+  background: var(--steel);
+  border-radius: 2px;
+}
+
+.teams .flag {
+  width: 20px;
+}
+
+.scoreboard .flag {
+  width: 34px;
+}
+
+/* --- hero --- */
+.hero {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #14181d, #0b0e11);
+  border: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero.live {
+  border-color: rgba(255, 106, 0, 0.5);
+  box-shadow: inset 0 0 60px -22px var(--accent);
+}
+
+.hero-tag {
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.hero.live .hero-tag {
+  color: var(--accent);
+}
+
+.hero-comp {
+  color: var(--muted);
+}
+
+.hero-match {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin: 0.85rem 0 0.6rem;
+}
+
+.hero-team {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.hero-team.away {
+  justify-content: flex-end;
+}
+
+.hero-team .flag {
+  width: 52px;
+}
+
+.hero-score {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  font-size: 3rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-score i {
+  color: var(--muted);
+  font-style: normal;
+}
+
+.hero.live .hero-score {
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(255, 106, 0, 0.4);
+}
+
+.hero-bar {
+  height: 6px;
+  background: var(--steel);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.25rem;
+}
+
+.hero-bar > div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--spark));
+  transition: width 0.5s ease;
+}
+
+.hero-pick {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.hero-pick strong {
+  color: var(--text);
+}
+
+/* highlight the Pick panel as the centre of attention */
+.pick-panel {
+  border-color: #2b3138;
+}
+
+@media (max-width: 560px) {
+  .hero-score {
+    font-size: 2.2rem;
+  }
+  .hero-team {
+    font-size: 0.95rem;
+  }
+  .hero-team .flag {
+    width: 38px;
+  }
 }
