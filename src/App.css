@@ -587,6 +587,19 @@ header h1 {
 
 .goals .g-scorer {
   flex: 1;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.goals .g-scorer:hover {
+  color: var(--arc);
+  text-decoration: underline;
+}
+
+.goals .g-club {
+  color: var(--muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
 }
 
 .goals .flag {

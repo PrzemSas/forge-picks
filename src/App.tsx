@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
-import { flagUrl } from './teams'
+import { flagUrl, playerSearchUrl } from './teams'
 
 type Fixture = {
   id: string
@@ -12,7 +12,7 @@ type Fixture = {
   venue?: string
 }
 
-type Goal = { minute: number; side: 'home' | 'away'; scorer: string }
+type Goal = { minute: number; side: 'home' | 'away'; scorer: string; club?: string }
 
 type Score = {
   home: number
@@ -318,7 +318,10 @@ export default function App() {
                     <li key={i}>
                       <span className="g-min">{g.minute}'</span>
                       <span className="g-ball">⚽</span>
-                      <span className="g-scorer">{g.scorer}</span>
+                      <a className="g-scorer" href={playerSearchUrl(g.scorer)} target="_blank" rel="noreferrer">
+                        {g.scorer}
+                      </a>
+                      {g.club && <span className="g-club">{g.club}</span>}
                       <Flag name={g.side === 'home' ? selected.home : selected.away} size="w20" />
                     </li>
                   ))}

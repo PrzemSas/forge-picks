@@ -145,9 +145,9 @@ app.get('/api/scores/:fixtureId', async (req, res) => {
 const LIVE_ID = 'wc-r16-2'
 const MATCH_SECONDS = 90
 const LIVE_GOALS = [
-  { minute: 12, side: 'home', scorer: 'Florian Wirtz' },
-  { minute: 34, side: 'away', scorer: 'Antonio Sanabria' },
-  { minute: 67, side: 'home', scorer: 'Jamal Musiala' },
+  { minute: 12, side: 'home', scorer: 'Florian Wirtz', club: 'Liverpool' },
+  { minute: 34, side: 'away', scorer: 'Antonio Sanabria', club: 'Torino' },
+  { minute: 67, side: 'home', scorer: 'Jamal Musiala', club: 'Bayern München' },
 ]
 let liveStartedAt = null
 
@@ -180,9 +180,9 @@ function mockScore(fixtureId) {
       minute: 90,
       status: 'finished',
       goals: [
-        { minute: 23, side: 'home', scorer: 'Santiago Giménez' },
-        { minute: 51, side: 'away', scorer: 'Enner Valencia' },
-        { minute: 78, side: 'home', scorer: 'Hirving Lozano' },
+        { minute: 23, side: 'home', scorer: 'Santiago Giménez', club: 'AC Milan' },
+        { minute: 51, side: 'away', scorer: 'Enner Valencia', club: 'Internacional' },
+        { minute: 78, side: 'home', scorer: 'Hirving Lozano', club: 'San Diego FC' },
       ],
     },
     'wc-r32-2': {
@@ -191,9 +191,9 @@ function mockScore(fixtureId) {
       minute: 90,
       status: 'finished',
       goals: [
-        { minute: 15, side: 'home', scorer: 'Harry Kane' },
-        { minute: 40, side: 'home', scorer: 'Bukayo Saka' },
-        { minute: 62, side: 'home', scorer: 'Phil Foden' },
+        { minute: 15, side: 'home', scorer: 'Harry Kane', club: 'Bayern München' },
+        { minute: 40, side: 'home', scorer: 'Bukayo Saka', club: 'Arsenal' },
+        { minute: 62, side: 'home', scorer: 'Phil Foden', club: 'Manchester City' },
       ],
     },
   }

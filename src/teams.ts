@@ -58,3 +58,9 @@ export function flagUrl(name: string, size: 'w20' | 'w40' | 'w80' | 'w160' = 'w4
   const code = flagCode(name)
   return code ? `https://flagcdn.com/${size}/${code}.png` : null
 }
+
+// Where to look a scorer up (current club, profile). Transfermarkt quick search
+// always resolves, even for demo names.
+export function playerSearchUrl(name: string): string {
+  return `https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=${encodeURIComponent(name)}`
+}
