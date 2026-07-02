@@ -15,6 +15,6 @@ try {
   console.log(`TXLINE_GUEST_JWT=${typeof jwt === 'string' ? jwt : JSON.stringify(jwt)}`)
   console.log('\n# Next: on-chain subscribe in Phantom, then POST /api/token/activate (see txline-activate.md)')
 } catch (err) {
-  console.error(`Failed to get guest JWT from ${base}:`, String(err))
+  console.error(`Failed to get guest JWT from ${origin}:`, String(err))
   process.exit(1)
 }

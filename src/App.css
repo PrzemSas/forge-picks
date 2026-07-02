@@ -666,3 +666,89 @@ header h1 {
   color: var(--muted);
   font-size: 0.72rem;
 }
+
+/* --- TxLINE proof strip --- */
+.txline-strip {
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.txline-strip .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--arc);
+  box-shadow: 0 0 8px var(--arc);
+}
+
+.txline-strip strong {
+  color: var(--arc);
+}
+
+.txline-strip code {
+  color: var(--text);
+  background: #0e1114;
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+}
+
+/* --- demo controls --- */
+.demo-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.demo-controls .kickoff {
+  margin-bottom: 0;
+}
+
+.reset-btn {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #14181c;
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reset-btn:hover {
+  border-color: var(--accent);
+}
+
+/* --- footer --- */
+.foot {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.foot a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.foot a:hover {
+  text-decoration: underline;
+}
+
+/* --- mobile: Pick first --- */
+@media (max-width: 899px) {
+  .pick-panel {
+    order: -1;
+  }
+}

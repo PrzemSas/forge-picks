@@ -155,6 +155,10 @@ export default function App() {
     fetch(`${API}/live/kickoff`, { method: 'POST' }).catch(console.error)
   }, [])
 
+  const resetDemo = useCallback(() => {
+    fetch(`${API}/live/reset`, { method: 'POST' }).catch(console.error)
+  }, [])
+
   const selected = fixtures.find((f) => f.id === selectedId) ?? null
   const selectedScore = selected ? scores[selectedId!] : undefined
   const myPick = picks.find((p) => p.fixtureId === selectedId)
@@ -241,7 +245,7 @@ export default function App() {
             {fPick ? (
               <>
                 Your pick: <strong>{teamOf(featured, fPick.choice)}</strong>
-                {fStatus === 'finished' ? (outcomeOf(fScore) === fPick.choice ? ' ✓' : ' ✗') : ' · locked in'}
+                {fStatus === 'finished' ? (outcomeOf(fScore) === fPick.choice ? ' ✓' : ' ✗') : ' · your call'}
               </>
             ) : (
               'Make your pick below ↓'
@@ -249,6 +253,11 @@ export default function App() {
           </div>
         </section>
       )}
+
+      <div className="txline-strip">
+        <span className="dot" /> Live scores via <strong>TxLINE</strong> · <code>/fixtures/snapshot</code> ·{' '}
+        <code>/scores/snapshot</code>
+      </div>
 
       <main className="grid">
         <section className="panel">
@@ -328,10 +337,18 @@ export default function App() {
                 </ul>
               )}
 
-              {selected.id === LIVE_ID && selectedScore?.status === 'scheduled' && !txlineOk && (
-                <button type="button" className="kickoff" onClick={kickoff}>
-                  ▶ Kick off (demo)
-                </button>
+              {selected.id === LIVE_ID && !txlineOk && (
+                <div className="demo-controls">
+                  {(selectedScore?.status ?? 'scheduled') === 'scheduled' ? (
+                    <button type="button" className="kickoff" onClick={kickoff}>
+                      ▶ Kick off (demo)
+                    </button>
+                  ) : (
+                    <button type="button" className="reset-btn" onClick={resetDemo}>
+                      ↺ Reset demo
+                    </button>
+                  )}
+                </div>
               )}
 
               <div className="pick-row">
@@ -356,7 +373,7 @@ export default function App() {
                     <p className="verdict loss">✖ Missed this one</p>
                   )
                 ) : (
-                  <p className="hint">Pick locked in. Points forge when the match ends.</p>
+                  <p className="hint">Your call is in — points forge at full time.</p>
                 ))}
               {!myPick && <p className="hint">Tap a side to stake your call.</p>}
             </>
@@ -392,6 +409,17 @@ export default function App() {
           )}
         </section>
       </main>
+
+      <footer className="foot">
+        <span>
+          Built by{' '}
+          <a href="https://gorweld.com" target="_blank" rel="noreferrer">
+            PrzemSas
+          </a>{' '}
+          · Superteam Earn · Consumer &amp; Fan Experiences
+        </span>
+        <span>Data: TxLINE (TxODDS)</span>
+      </footer>
     </div>
   )
 }
