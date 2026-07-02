@@ -5,6 +5,8 @@ Built for **Superteam Earn × TxODDS** — _Consumer & Fan Experiences_ track.
 
 > Call a match outcome, watch the game unfold live, and climb the Forge Board as results settle in real time.
 
+**▶ Live demo: <https://forge-picks.vercel.app>**
+
 <!-- Add a screenshot at docs/forge-picks.png and uncomment: -->
 <!-- ![Forge Picks](docs/forge-picks.png) -->
 
@@ -62,7 +64,7 @@ The badge flips from **● Demo replay** to **● Live data**.
 ## Hackathon checklist
 
 - [x] Public repo
-- [ ] Deployed URL (Vercel)
+- [x] Deployed URL — <https://forge-picks.vercel.app>
 - [ ] Live TxLINE data (`.env` + Phantom)
 - [ ] Demo video ≤ 5 min (Loom/YouTube)
 - [ ] Brief doc: idea + TxLINE endpoints + API feedback
