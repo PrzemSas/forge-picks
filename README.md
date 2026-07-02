@@ -7,8 +7,7 @@ Built for **Superteam Earn × TxODDS** — _Consumer & Fan Experiences_ track.
 
 **▶ Live demo: <https://forge-picks.vercel.app>**
 
-<!-- Add a screenshot at docs/forge-picks.png and uncomment: -->
-<!-- ![Forge Picks](docs/forge-picks.png) -->
+![Forge Picks — live World Cup fan picks](docs/forge-picks.png)
 
 ## What it does
 
