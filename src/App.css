@@ -1,10 +1,17 @@
 :root {
-  --bg: #0f0a1a;
-  --panel: #1a1028;
-  --accent: #ff6b2c;
-  --accent2: #7c4dff;
-  --text: #f5f0ff;
-  --muted: #9a8fb0;
+  /* GorWeld brand — steel, torch flame, welding arc, spark */
+  --bg: #0a0a0a;
+  --bg2: #0c0f12;
+  --steel: #1a1d21;
+  --panel: #121519;
+  --line: #23282e;
+  --accent: #ff6a00; /* torch orange */
+  --arc: #3eb7f4; /* welding arc blue */
+  --spark: #ffd23f; /* spark gold */
+  --win: #5fe08a;
+  --loss: #ff5a4a;
+  --text: #e9eef2;
+  --muted: #9aa6ad;
 }
 
 * {
@@ -13,7 +20,7 @@
 
 body {
   margin: 0;
-  background: radial-gradient(ellipse at top, #2a1545, var(--bg) 55%);
+  background: radial-gradient(ellipse at top, #12161b, var(--bg) 60%);
   color: var(--text);
   font-family: system-ui, sans-serif;
 }
@@ -27,6 +34,7 @@ body {
 header h1 {
   margin: 0.25rem 0;
   font-size: 2.4rem;
+  text-shadow: 0 0 24px rgba(255, 106, 0, 0.35);
 }
 
 .eyebrow {
@@ -54,16 +62,19 @@ header h1 {
   padding: 0.25rem 0.6rem;
   border-radius: 999px;
   font-size: 0.8rem;
+  border: 1px solid transparent;
 }
 
 .badge.mock {
-  background: #3a2a10;
-  color: #ffc56d;
+  background: #241a06;
+  color: var(--spark);
+  border-color: #4a380f;
 }
 
 .badge.live {
-  background: #12321f;
-  color: #7dffb2;
+  background: #0a2530;
+  color: #7dd3fc;
+  border-color: #164a5c;
 }
 
 .grid {
@@ -80,7 +91,7 @@ header h1 {
 
 .panel {
   background: var(--panel);
-  border: 1px solid #2f2344;
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 1rem;
 }
@@ -88,7 +99,9 @@ header h1 {
 .panel h2 {
   margin-top: 0;
   font-size: 1rem;
-  color: var(--accent2);
+  color: var(--arc);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .fixtures {
@@ -102,12 +115,17 @@ header h1 {
 .fixtures button {
   width: 100%;
   text-align: left;
-  background: #120c1c;
-  border: 1px solid #322748;
+  background: #0e1114;
+  border: 1px solid var(--line);
   color: inherit;
   border-radius: 8px;
   padding: 0.75rem;
   cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.fixtures button:hover {
+  border-color: #384049;
 }
 
 .fixtures button.active {
@@ -132,33 +150,17 @@ header h1 {
 }
 
 .pick-row button {
-  background: linear-gradient(180deg, #3a2258, #241636);
-  border: 1px solid #4a3568;
+  background: linear-gradient(180deg, #1c2126, #14181c);
+  border: 1px solid #2b3138;
   color: var(--text);
   border-radius: 8px;
   padding: 0.75rem 0.5rem;
   cursor: pointer;
+  transition: border-color 0.15s;
 }
 
 .pick-row button:hover {
   border-color: var(--accent);
-}
-
-.bead {
-  margin: 1.25rem auto 0.5rem;
-  width: 80%;
-  height: 10px;
-  background: #2a2038;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.bead-glow {
-  height: 100%;
-  width: 65%;
-  background: linear-gradient(90deg, var(--accent), #ffd166);
-  border-radius: inherit;
-  box-shadow: 0 0 12px var(--accent);
 }
 
 .hint {
@@ -177,7 +179,7 @@ header h1 {
   align-items: center;
   gap: 0.6rem;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #2a2038;
+  border-bottom: 1px solid var(--line);
 }
 
 .board li .rank {
@@ -211,8 +213,8 @@ header h1 {
   margin: 0.75rem 0 1rem;
   padding: 0.75rem;
   border-radius: 10px;
-  background: #120c1c;
-  border: 1px solid #322748;
+  background: #0e1114;
+  border: 1px solid var(--line);
 }
 
 .scoreboard .big {
@@ -245,7 +247,7 @@ header h1 {
 }
 
 .scoreboard.finished {
-  border-color: #2f5a3c;
+  border-color: #1f4a5a;
 }
 
 .row1 {
@@ -273,9 +275,9 @@ header h1 {
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 107, 44, 0.6); }
-  70% { box-shadow: 0 0 0 7px rgba(255, 107, 44, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 107, 44, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(255, 106, 0, 0.6); }
+  70% { box-shadow: 0 0 0 7px rgba(255, 106, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 106, 0, 0); }
 }
 
 .vs {
@@ -290,16 +292,20 @@ header h1 {
   padding: 0.6rem;
   border-radius: 8px;
   border: 1px solid var(--accent);
-  background: linear-gradient(180deg, var(--accent), #d8531c);
-  color: #1a0f05;
+  background: linear-gradient(180deg, var(--accent), #d85800);
+  color: #140a02;
   font-weight: 800;
   cursor: pointer;
+}
+
+.kickoff:hover {
+  box-shadow: 0 0 18px -4px var(--accent);
 }
 
 .pick-row button.chosen {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent);
-  background: linear-gradient(180deg, #5a2f10, #3a1f0a);
+  background: linear-gradient(180deg, #3a2408, #241606);
 }
 
 .pick-row button:disabled {
@@ -313,11 +319,11 @@ header h1 {
 }
 
 .verdict.win {
-  color: #7dffb2;
+  color: var(--win);
 }
 
 .verdict.loss {
-  color: #ff8a7d;
+  color: var(--loss);
 }
 
 .hint.small {
