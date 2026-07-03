@@ -65,8 +65,9 @@ The badge flips from **● Demo replay** to **● Live data**.
 - [x] Public repo
 - [x] Deployed URL — <https://forge-picks.vercel.app>
 - [x] Live TxLINE data (devnet — real World Cup feed, on-chain subscription)
-- [ ] Demo video ≤ 5 min (Loom/YouTube)
-- [ ] Brief doc: idea + TxLINE endpoints + API feedback
+- [x] Demo video ≤ 5 min — `~/forge-picks-demo.mp4` (re-recorded Jul 3, current UI)
+- [x] Brief doc — [`docs/HACKATHON-SUBMISSION.md`](docs/HACKATHON-SUBMISSION.md) + [`docs/VIDEO-UPLOAD.txt`](docs/VIDEO-UPLOAD.txt)
+- [ ] Upload video → add YouTube link to submission doc
 - [ ] Submit on Earn → **Consumer & Fan Experiences**
 
 ## Notes

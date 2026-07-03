@@ -1,0 +1,28 @@
+=== YOUTUBE / LOOM TITLE ===
+Forge Picks — Live TxLINE World Cup fan picks | Superteam Earn × TxODDS
+
+=== DESCRIPTION (paste as-is) ===
+Forge Picks turns live World Cup scores from TxLINE into a simple fan pick game.
+
+Pick home, draw, or away → watch the match update every 2 seconds → earn forge points when you're right → climb the Forge Board.
+
+Built for Superteam Earn × TxODDS — Consumer & Fan Experiences track.
+
+▶ Live app: https://forge-picks.vercel.app
+▶ Source: https://github.com/PrzemSas/forge-picks
+
+Powered by TxLINE (TxODDS):
+• POST /auth/guest/start — guest JWT
+• POST /api/token/activate — API token (after on-chain subscription)
+• GET /api/fixtures/snapshot — World Cup fixtures
+• GET /api/scores/snapshot/{fixtureId} — live scores & events
+
+The video shows mock replay first (full match flow), then production with real TxLINE data on Solana devnet. Same UI — no separate codebase.
+
+Built by PrzemSas · GORWELD® — https://gorweld.com
+
+=== TAGS (optional) ===
+TxLINE TxODDS Superteam Solana World Cup fan app hackathon Forge Picks
+
+=== EARN FORM — SHORT PITCH (copy field) ===
+Forge Picks: TxLINE live World Cup feed → fan pick game. One screen: fixtures, live score, your call, leaderboard. Server-side API proxy keeps tokens off the browser. Demo + production on forge-picks.vercel.app.
