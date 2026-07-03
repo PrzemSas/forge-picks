@@ -577,6 +577,12 @@ export default function App() {
                 </span>
               </div>
 
+              {selectedScore?.status === 'live' && (
+                <div className="mini-bar">
+                  <div style={{ width: `${Math.min(100, ((selectedScore.minute ?? 0) / 90) * 100)}%` }} />
+                </div>
+              )}
+
               {selectedScore?.stats && selectedScore.status !== 'scheduled' && (
                 <div className="stat-row">
                   <span>
@@ -787,6 +793,26 @@ export default function App() {
           </div>
         </div>
       )}
+
+      <section className="wc-sponsors">
+        <span className="partners-label">FIFA World Cup 2026 · Official partners &amp; sponsors</span>
+        <div className="partners-row">
+          {['Adidas', 'Coca-Cola', 'Hyundai–Kia', 'Visa', 'Qatar Airways', 'Aramco', 'Lenovo'].map((s) => (
+            <span key={s} className="sponsor tier1">
+              {s}
+            </span>
+          ))}
+        </div>
+        <div className="partners-row">
+          {['AB InBev', 'Bank of America', "Lay's", 'Hisense', "McDonald's", 'Mengniu', 'Unilever', 'Verizon'].map(
+            (s) => (
+              <span key={s} className="sponsor">
+                {s}
+              </span>
+            ),
+          )}
+        </div>
+      </section>
 
       <section className="partners">
         <span className="partners-label">Powered by</span>

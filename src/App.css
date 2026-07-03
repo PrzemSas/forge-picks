@@ -824,6 +824,46 @@ header h1 .flame {
   .spark-p { animation: none; }
 }
 
+/* --- live mini progress bar (Pick panel) --- */
+.mini-bar {
+  height: 4px;
+  background: var(--steel);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: -0.5rem 0 0.75rem;
+}
+
+.mini-bar > div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--spark));
+  transition: width 0.5s ease;
+}
+
+/* --- FIFA WC sponsors --- */
+.wc-sponsors {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.wc-sponsors .partners-row + .partners-row {
+  margin-top: 0.45rem;
+}
+
+.sponsor {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #141920;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.sponsor.tier1 {
+  border-color: rgba(255, 210, 63, 0.35);
+  color: #d8cba0;
+}
+
 /* --- partners --- */
 .partners {
   margin-top: 2rem;
