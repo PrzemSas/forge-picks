@@ -16,13 +16,22 @@ type Fixture = {
 // player names, and only the latest goal has an exact minute (older ones: half).
 type Goal = { minute: number | null; half?: 1 | 2 | null; side: 'home' | 'away'; scorer: string; club?: string }
 
+type SideStats = { corners: number; yellows: number; reds: number }
+
 type Score = {
   home: number
   away: number
   minute: number
   status: 'scheduled' | 'live' | 'finished'
   goals?: Goal[]
+  stats?: { home: SideStats; away: SideStats } | null
 }
+
+// Final Forecast — long-range bonus picks, settled when the MetLife final ends.
+type Forecast = { champion: string | null; runnerUp: string | null }
+const FINAL_DATE = '2026-07-19'
+const BONUS_CHAMPION = 50
+const BONUS_FINALIST = 25
 
 type Outcome = 'home' | 'away' | 'draw'
 type Pick = { fixtureId: string; choice: Outcome }
@@ -45,6 +54,23 @@ const RIVALS: { name: string; base: number; live: Outcome }[] = [
 ]
 
 const LIVE_ID = 'wc-r16-2'
+
+// Overlay exact minutes captured live on the client (the snapshot API only
+// keeps the last goal's minute — but we watch every goal as it happens).
+function withCapturedMinutes(
+  fixtureId: string,
+  goals: Goal[] | undefined,
+  mins: Record<string, Record<string, number>>,
+): Goal[] | undefined {
+  const m = mins[fixtureId]
+  if (!goals || !m) return goals
+  const counters: Record<string, number> = { home: 0, away: 0 }
+  return goals.map((g) => {
+    const idx = counters[g.side]++
+    const exact = m[`${g.side}-${idx}`]
+    return exact != null && g.minute == null ? { ...g, minute: exact } : g
+  })
+}
 
 function kickoffLabel(iso: string): string {
   const d = new Date(iso)
@@ -84,6 +110,20 @@ export default function App() {
     }
   })
   const [txlineOk, setTxlineOk] = useState(false)
+  const [goalMins, setGoalMins] = useState<Record<string, Record<string, number>>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('forge-goal-mins') || '{}')
+    } catch {
+      return {}
+    }
+  })
+  const [forecast, setForecast] = useState<Forecast>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('forge-forecast') || '{"champion":null,"runnerUp":null}')
+    } catch {
+      return { champion: null, runnerUp: null }
+    }
+  })
   const [squadTeam, setSquadTeam] = useState<string | null>(null)
   const [squad, setSquad] = useState<Squad | null>(null)
   const [squadLoading, setSquadLoading] = useState(false)
@@ -159,7 +199,8 @@ export default function App() {
       if (!s || s.status !== 'finished' || f.id.startsWith('wc-')) continue
       const prev = archive[f.id]
       if (prev && prev.score.home === s.home && prev.score.away === s.away && (prev.score.goals?.length ?? 0) >= (s.goals?.length ?? 0)) continue
-      updates.push({ ...f, status: 'finished', score: s, archivedAt: prev?.archivedAt ?? Date.now() })
+      const withMins = { ...s, goals: withCapturedMinutes(f.id, s.goals, goalMins) }
+      updates.push({ ...f, status: 'finished', score: withMins, archivedAt: prev?.archivedAt ?? Date.now() })
     }
     if (updates.length > 0) {
       setArchive((prev) => {
@@ -169,7 +210,7 @@ export default function App() {
         return next
       })
     }
-  }, [scores, fixtures, archive])
+  }, [scores, fixtures, archive, goalMins])
 
   // ?demo[=seconds] → auto-start the demo clock (shareable live-looking link / screenshots)
   useEffect(() => {
@@ -195,6 +236,15 @@ export default function App() {
         setGoal({ team: side === 'home' ? f.home : f.away, minute: last?.minute ?? c.minute, scorer: last?.scorer })
         window.clearTimeout(goalTimer.current)
         goalTimer.current = window.setTimeout(() => setGoal(null), 2600)
+        // remember the exact minute we saw this goal happen
+        const idx = (side === 'home' ? c.home : c.away) - 1
+        const key = `${side}-${idx}`
+        setGoalMins((prev) => {
+          if (prev[f.id]?.[key] != null) return prev
+          const next = { ...prev, [f.id]: { ...(prev[f.id] ?? {}), [key]: last?.minute ?? c.minute } }
+          localStorage.setItem('forge-goal-mins', JSON.stringify(next))
+          return next
+        })
       }
     }
     prevScoresRef.current = scores
@@ -211,6 +261,10 @@ export default function App() {
       }
     }
   }, [scores, picks])
+
+  useEffect(() => {
+    localStorage.setItem('forge-forecast', JSON.stringify(forecast))
+  }, [forecast])
 
   // Squad viewer (TheSportsDB via /api/squad)
   useEffect(() => {
@@ -243,8 +297,19 @@ export default function App() {
   const selectedScore = selected ? scores[selectedId!] : undefined
   const myPick = picks.find((p) => p.fixtureId === selectedId)
 
-  // Hero = the live match if any, else the selected/first fixture.
-  const featured = fixtures.find((f) => scores[f.id]?.status === 'live') ?? selected ?? fixtures[0] ?? null
+  // Finished real matches move to Match history; mock fixtures stay (demo flow).
+  const visibleFixtures = useMemo(
+    () => fixtures.filter((f) => f.id.startsWith('wc-') || (scores[f.id]?.status ?? f.status) !== 'finished'),
+    [fixtures, scores],
+  )
+
+  // Hero = live match, else the next upcoming one (never a real finished game).
+  const featured =
+    fixtures.find((f) => scores[f.id]?.status === 'live') ??
+    (selected && (selected.id.startsWith('wc-') || scores[selected.id]?.status !== 'finished') ? selected : null) ??
+    visibleFixtures[0] ??
+    fixtures[0] ??
+    null
   const fScore = featured ? scores[featured.id] : undefined
   const fStatus = fScore?.status ?? 'scheduled'
   const fPick = featured ? picks.find((p) => p.fixtureId === featured.id) : undefined
@@ -260,15 +325,51 @@ export default function App() {
     setPicks((prev) => [...prev.filter((p) => p.fixtureId !== selected.id), { fixtureId: selected.id, choice }])
   }
 
+  // When a real match ends it moves to history — shift focus to the next one.
+  useEffect(() => {
+    if (!selectedId || selectedId.startsWith('wc-')) return
+    if (scores[selectedId]?.status === 'finished') {
+      const next = visibleFixtures.find((f) => scores[f.id]?.status === 'live') ?? visibleFixtures[0]
+      if (next && next.id !== selectedId) setSelectedId(next.id)
+    }
+  }, [scores, selectedId, visibleFixtures])
+
+  // The final = whichever match kicks off on final day; settles forecast bonuses.
+  const finalMatch = useMemo(() => {
+    const live = fixtures.find((f) => f.kickoff.startsWith(FINAL_DATE))
+    if (live) return { ...live, score: scores[live.id] }
+    const past = Object.values(archive).find((m) => m.kickoff.startsWith(FINAL_DATE))
+    return past ? { ...past, score: past.score } : null
+  }, [fixtures, scores, archive])
+
+  const forecastBonus = useMemo(() => {
+    const s = finalMatch?.score
+    if (!finalMatch || !s || s.status !== 'finished') return 0
+    const winner = s.home > s.away ? finalMatch.home : s.away > s.home ? finalMatch.away : null
+    let bonus = 0
+    for (const nation of [forecast.champion, forecast.runnerUp]) {
+      if (nation && (nation === finalMatch.home || nation === finalMatch.away)) bonus += BONUS_FINALIST
+    }
+    if (winner && forecast.champion === winner) bonus += BONUS_CHAMPION
+    return bonus
+  }, [finalMatch, forecast])
+
   // Points survive the fixture dropping out of the TxLINE window: fall back to the archive.
   const myPoints = useMemo(
     () =>
       picks.reduce(
         (sum, p) => sum + (outcomeOf(scores[p.fixtureId] ?? archive[p.fixtureId]?.score) === p.choice ? 10 : 0),
         0,
-      ),
-    [picks, scores, archive],
+      ) + forecastBonus,
+    [picks, scores, archive, forecastBonus],
   )
+
+  const share = useCallback(() => {
+    const parts = [`🔥 Forge Picks — ${myPoints} pts on the World Cup forge board (${picks.length} calls).`]
+    if (forecast.champion) parts.push(`My champion: ${forecast.champion} 🏆`)
+    parts.push('https://forge-picks.vercel.app')
+    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(parts.join(' '))}`, '_blank', 'noopener')
+  }, [picks, myPoints, forecast])
 
   const leaderboard = useMemo(() => {
     const liveOut = outcomeOf(scores[LIVE_ID])
@@ -313,6 +414,12 @@ export default function App() {
           Live World Cup data via TxLINE · call the outcome · climb the forge board as the match burns.
         </p>
         <span className={`badge ${txlineOk ? 'live' : 'mock'}`}>{txlineOk ? '● Live data' : '● Demo replay'}</span>
+        <nav className="hub-nav">
+          <a href="#matches">Matches</a>
+          <a href="#final">Final</a>
+          <a href="#history">History</a>
+          <a href="#teams">Teams</a>
+        </nav>
       </header>
 
       {featured && (
@@ -358,7 +465,7 @@ export default function App() {
         </section>
       )}
 
-      <section className="final-banner">
+      <section className="final-banner" id="final">
         <div className="fb-inner">
           <span className="fb-tag">🏆 The Final · Sunday, 19 July 2026</span>
           <h3>MetLife Stadium</h3>
@@ -368,6 +475,32 @@ export default function App() {
             <span className="chip silver">Runner-up $33M</span>
             <span className="chip">FIFA pool $871M</span>
           </div>
+          <div className="fb-forecast">
+            <span className="fb-f-label">Your forecast:</span>
+            <select
+              value={forecast.champion ?? ''}
+              onChange={(e) => setForecast((f) => ({ ...f, champion: e.target.value || null }))}
+            >
+              <option value="">Champion (+{BONUS_CHAMPION})</option>
+              {allTeams.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </select>
+            <select
+              value={forecast.runnerUp ?? ''}
+              onChange={(e) => setForecast((f) => ({ ...f, runnerUp: e.target.value || null }))}
+            >
+              <option value="">Runner-up (+{BONUS_FINALIST})</option>
+              {allTeams.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </select>
+            {forecastBonus > 0 ? (
+              <span className="fb-bonus">⚒ +{forecastBonus} forged!</span>
+            ) : (
+              <span className="fb-note">+{BONUS_FINALIST} per finalist · +{BONUS_CHAMPION} champion · settles 19 July</span>
+            )}
+          </div>
         </div>
       </section>
 
@@ -376,11 +509,11 @@ export default function App() {
         <code>/scores/snapshot</code>
       </div>
 
-      <main className="grid">
+      <main className="grid" id="matches">
         <section className="panel">
           <h2>Matches</h2>
           <ul className="fixtures">
-            {fixtures.map((f) => {
+            {visibleFixtures.map((f) => {
               const s = scores[f.id]
               const live = s?.status === 'live'
               return (
@@ -438,9 +571,25 @@ export default function App() {
                 </span>
               </div>
 
+              {selectedScore?.stats && selectedScore.status !== 'scheduled' && (
+                <div className="stat-row">
+                  <span>
+                    ⚑ {selectedScore.stats.home.corners}–{selectedScore.stats.away.corners} corners
+                  </span>
+                  <span>
+                    🟨 {selectedScore.stats.home.yellows}–{selectedScore.stats.away.yellows}
+                  </span>
+                  {(selectedScore.stats.home.reds > 0 || selectedScore.stats.away.reds > 0) && (
+                    <span>
+                      🟥 {selectedScore.stats.home.reds}–{selectedScore.stats.away.reds}
+                    </span>
+                  )}
+                </div>
+              )}
+
               {selectedScore?.goals && selectedScore.goals.length > 0 && (
                 <ul className="goals">
-                  {selectedScore.goals.map((g, i) => (
+                  {(withCapturedMinutes(selected.id, selectedScore.goals, goalMins) ?? []).map((g, i) => (
                     <li key={i}>
                       <span className="g-min">
                         {g.minute != null ? `${g.minute}'` : g.half ? `${g.half}H` : '—'}
@@ -522,6 +671,9 @@ export default function App() {
               </li>
             ))}
           </ol>
+          <button type="button" className="share-btn" onClick={share}>
+            𝕏 Share my forge
+          </button>
           {nextUp.length > 0 && (
             <div className="next-up">
               <h3>Next up</h3>
@@ -539,7 +691,7 @@ export default function App() {
       </main>
 
       {history.length > 0 && (
-        <section className="panel history">
+        <section className="panel history" id="history">
           <h2>Match history</h2>
           <ul className="history-list">
             {history.map((m) => {
@@ -585,7 +737,7 @@ export default function App() {
       )}
 
       {allTeams.length > 0 && (
-        <section className="panel teams-panel">
+        <section className="panel teams-panel" id="teams">
           <h2>Teams</h2>
           <div className="teams-grid">
             {allTeams.map((t) => (
