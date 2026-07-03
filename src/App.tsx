@@ -12,7 +12,9 @@ type Fixture = {
   venue?: string
 }
 
-type Goal = { minute: number; side: 'home' | 'away'; scorer: string; club?: string }
+// scorer may be empty and minute null — the live TxLINE devnet feed carries no
+// player names, and only the latest goal has an exact minute (older ones: half).
+type Goal = { minute: number | null; half?: 1 | 2 | null; side: 'home' | 'away'; scorer: string; club?: string }
 
 type Score = {
   home: number
@@ -36,6 +38,12 @@ const RIVALS: { name: string; base: number; live: Outcome }[] = [
 ]
 
 const LIVE_ID = 'wc-r16-2'
+
+function kickoffLabel(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return 'Upcoming'
+  return d.toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+}
 
 function outcomeOf(s: Score | undefined): Outcome | null {
   if (!s || s.status !== 'finished') return null
@@ -223,7 +231,9 @@ export default function App() {
     <div className="app">
       <header>
         <p className="eyebrow">World Cup 2026 · Fan Picks</p>
-        <h1>🔥 Forge Picks</h1>
+        <h1>
+          <span className="flame">🔥</span> Forge Picks
+        </h1>
         <p className="sub">
           Live World Cup data via TxLINE · call the outcome · climb the forge board as the match burns.
         </p>
@@ -306,7 +316,7 @@ export default function App() {
                     </span>
                     <span className="meta">
                       {f.round ? `${f.round} · ` : ''}
-                      {live ? `${s!.minute}'` : s?.status === 'finished' ? 'FT' : 'Upcoming'}
+                      {live ? `${s!.minute}'` : s?.status === 'finished' ? 'FT' : kickoffLabel(f.kickoff)}
                     </span>
                     {f.venue && <span className="venue-sm">📍 {f.venue}</span>}
                   </button>
@@ -344,11 +354,17 @@ export default function App() {
                 <ul className="goals">
                   {selectedScore.goals.map((g, i) => (
                     <li key={i}>
-                      <span className="g-min">{g.minute}'</span>
+                      <span className="g-min">
+                        {g.minute != null ? `${g.minute}'` : g.half ? `${g.half}H` : '—'}
+                      </span>
                       <span className="g-ball">⚽</span>
-                      <a className="g-scorer" href={playerSearchUrl(g.scorer)} target="_blank" rel="noreferrer">
-                        {g.scorer}
-                      </a>
+                      {g.scorer ? (
+                        <a className="g-scorer" href={playerSearchUrl(g.scorer)} target="_blank" rel="noreferrer">
+                          {g.scorer}
+                        </a>
+                      ) : (
+                        <span className="g-scorer">{g.side === 'home' ? selected.home : selected.away}</span>
+                      )}
                       {g.club && <span className="g-club">{g.club}</span>}
                       <Flag name={g.side === 'home' ? selected.home : selected.away} size="w20" />
                     </li>
