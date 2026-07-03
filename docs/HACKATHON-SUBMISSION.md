@@ -4,6 +4,8 @@
 **Deadline:** 19 July 2026  
 **Builder:** [PrzemSas](https://github.com/PrzemSas) · [GORWELD®](https://gorweld.com)
 
+> **Status (2026-07-03):** Gotowe do submitu — **nie zgłaszać** na Earn bez wyraźnej komendy od buildera.
+
 ---
 
 ## Links

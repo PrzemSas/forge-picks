@@ -23,3 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Demo video pipeline — binaries local only (see docs/AUDIO-SOURCES.txt)
+docs/audio/*.mp3
+docs/audio/*.wav
+docs/audio/commentary/
+scripts/demo-video/video/
