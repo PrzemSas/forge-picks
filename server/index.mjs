@@ -4,6 +4,7 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import { getFixtures, getScore, txlineConfigured, BASE_URL } from '../lib/txline.mjs'
+import { getSquad } from '../lib/thesportsdb.mjs'
 
 const app = express()
 const PORT = process.env.API_PORT || 8787
@@ -21,6 +22,12 @@ app.get('/api/fixtures', async (_req, res) => {
 
 app.get('/api/scores/:fixtureId', async (req, res) => {
   res.json(await getScore(req.params.fixtureId, req.query.t))
+})
+
+app.get('/api/squad', async (req, res) => {
+  const team = String(req.query.team || '').slice(0, 60)
+  if (!team) return res.status(400).json({ error: 'team required' })
+  res.json(await getSquad(team))
 })
 
 app.listen(PORT, () => {

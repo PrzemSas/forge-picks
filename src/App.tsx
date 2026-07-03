@@ -31,6 +31,9 @@ type Pick = { fixtureId: string; choice: Outcome }
 // rolling window of upcoming games, so results vanish from it after a day.
 type Archived = Fixture & { score: Score; archivedAt: number }
 
+type SquadPlayer = { name: string; position: string; number: string; img: string | null }
+type Squad = { team: string; badge?: string | null; players: SquadPlayer[] }
+
 const API = '/api'
 const POLL_MS = 2000
 
@@ -81,6 +84,9 @@ export default function App() {
     }
   })
   const [txlineOk, setTxlineOk] = useState(false)
+  const [squadTeam, setSquadTeam] = useState<string | null>(null)
+  const [squad, setSquad] = useState<Squad | null>(null)
+  const [squadLoading, setSquadLoading] = useState(false)
   const [kickoffAt, setKickoffAt] = useState<number | null>(() => {
     const v = localStorage.getItem('forge-kickoff')
     return v ? Number(v) : null
@@ -206,6 +212,22 @@ export default function App() {
     }
   }, [scores, picks])
 
+  // Squad viewer (TheSportsDB via /api/squad)
+  useEffect(() => {
+    if (!squadTeam) return
+    let alive = true
+    setSquad(null)
+    setSquadLoading(true)
+    fetch(`${API}/squad?team=${encodeURIComponent(squadTeam)}`)
+      .then((r) => r.json())
+      .then((d) => alive && setSquad(d))
+      .catch(() => alive && setSquad({ team: squadTeam, players: [] }))
+      .finally(() => alive && setSquadLoading(false))
+    return () => {
+      alive = false
+    }
+  }, [squadTeam])
+
   const kickoff = useCallback(() => {
     const t = Date.now()
     localStorage.setItem('forge-kickoff', String(t))
@@ -266,6 +288,19 @@ export default function App() {
     () => Object.values(archive).sort((a, b) => b.kickoff.localeCompare(a.kickoff)),
     [archive],
   )
+  // Every nation seen in the feed or the archive — tap one for its squad.
+  const allTeams = useMemo(() => {
+    const names = new Set<string>()
+    for (const f of fixtures) {
+      names.add(f.home)
+      names.add(f.away)
+    }
+    for (const m of history) {
+      names.add(m.home)
+      names.add(m.away)
+    }
+    return [...names].sort((a, b) => a.localeCompare(b))
+  }, [fixtures, history])
 
   return (
     <div className="app">
@@ -322,6 +357,19 @@ export default function App() {
           </div>
         </section>
       )}
+
+      <section className="final-banner">
+        <div className="fb-inner">
+          <span className="fb-tag">🏆 The Final · Sunday, 19 July 2026</span>
+          <h3>MetLife Stadium</h3>
+          <span className="fb-loc">East Rutherford, New Jersey · 82,500 seats</span>
+          <div className="fb-prizes">
+            <span className="chip gold">Champion $50M</span>
+            <span className="chip silver">Runner-up $33M</span>
+            <span className="chip">FIFA pool $871M</span>
+          </div>
+        </div>
+      </section>
 
       <div className="txline-strip">
         <span className="dot" /> Live scores via <strong>TxLINE</strong> · <code>/fixtures/snapshot</code> ·{' '}
@@ -440,6 +488,11 @@ export default function App() {
                 ))}
               </div>
 
+              <p className="hint prize-hint">
+                🏆 Road to MetLife: the champion nation takes <strong>$50M</strong>, the runner-up{' '}
+                <strong>$33M</strong> of FIFA's $871M pool.
+              </p>
+
               {myPick &&
                 (selectedScore?.status === 'finished' ? (
                   outcomeOf(selectedScore) === myPick.choice ? (
@@ -529,6 +582,52 @@ export default function App() {
           </ul>
           <p className="hint small">Finished matches are kept on this device — the live feed only carries upcoming games.</p>
         </section>
+      )}
+
+      {allTeams.length > 0 && (
+        <section className="panel teams-panel">
+          <h2>Teams</h2>
+          <div className="teams-grid">
+            {allTeams.map((t) => (
+              <button key={t} type="button" className="team-chip" onClick={() => setSquadTeam(t)}>
+                <Flag name={t} size="w20" /> {t}
+              </button>
+            ))}
+          </div>
+          <p className="hint small">Tap a nation for its squad.</p>
+        </section>
+      )}
+
+      {squadTeam && (
+        <div className="modal-backdrop" onClick={() => setSquadTeam(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <Flag name={squadTeam} size="w40" />
+              <h3>{squadTeam}</h3>
+              <button type="button" className="modal-x" onClick={() => setSquadTeam(null)}>
+                ✕
+              </button>
+            </div>
+            {squadLoading ? (
+              <p className="hint">Loading squad…</p>
+            ) : squad && squad.players.length > 0 ? (
+              <ul className="squad">
+                {squad.players.map((p) => (
+                  <li key={p.name}>
+                    {p.img ? <img src={p.img} alt="" loading="lazy" /> : <span className="squad-noimg">👤</span>}
+                    <a href={playerSearchUrl(p.name)} target="_blank" rel="noreferrer">
+                      {p.name}
+                    </a>
+                    <span className="squad-pos">{p.position}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="hint">No squad data for this team yet.</p>
+            )}
+            <p className="hint small">Squad data: TheSportsDB · tap a player for club &amp; profile</p>
+          </div>
+        </div>
       )}
 
       <footer className="foot">
