@@ -864,6 +864,36 @@ header h1 .flame {
   color: #d8cba0;
 }
 
+.sponsor {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+}
+
+.sponsor img {
+  height: 15px;
+  width: auto;
+  max-width: 96px;
+  object-fit: contain;
+  filter: brightness(0) invert(0.85);
+  opacity: 0.9;
+}
+
+.sponsor.tier1 img {
+  height: 17px;
+  filter: brightness(0) invert(1);
+}
+
+.sponsor:hover img {
+  filter: none;
+  opacity: 1;
+}
+
+.sponsor img.color {
+  filter: none;
+  opacity: 1;
+}
+
 /* --- partners --- */
 .partners {
   margin-top: 2rem;

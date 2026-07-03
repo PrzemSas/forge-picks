@@ -55,6 +55,39 @@ const RIVALS: { name: string; base: number; live: Outcome }[] = [
 
 const LIVE_ID = 'wc-r16-2'
 
+// FIFA WC 2026 sponsor wall — logos hotlinked from Wikimedia, rendered
+// monochrome; a dead URL falls back to the plain text chip.
+const WC_SPONSORS: { name: string; logo?: string; tier1?: boolean; noInvert?: boolean }[] = [
+  { name: 'Adidas', tier1: true, logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Adidas_2022_logo.svg/330px-Adidas_2022_logo.svg.png' },
+  { name: 'Coca-Cola', tier1: true, logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/Coca-Cola_logo.svg?width=300' },
+  { name: 'Hyundai–Kia', tier1: true, logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hyundai_Motor_Company_logo.svg?width=300' },
+  { name: 'Visa', tier1: true, logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/Visa_Inc._logo_%282021%E2%80%93present%29.svg?width=300' },
+  { name: 'Qatar Airways', tier1: true, logo: 'https://en.wikipedia.org/wiki/Special:FilePath/Qatar_Airways_Logo.svg?width=300' },
+  { name: 'Aramco', tier1: true, logo: 'https://en.wikipedia.org/wiki/Special:FilePath/Saudi_Aramco_logo.svg?width=300' },
+  { name: 'Lenovo', tier1: true, noInvert: true, logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/Lenovo%20Global%20Corporate%20Logo.png?width=300' },
+  { name: 'AB InBev', logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/Anheuser-Busch%20InBev%20Logo%202022.svg?width=300' },
+  { name: 'Bank of America', logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/Bank_of_America_logo.svg?width=300' },
+  { name: "Lay's", noInvert: true, logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Lay%27s_2025.svg/330px-Lay%27s_2025.svg.png" },
+  { name: 'Hisense', logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hisense%20logo.svg?width=300' },
+  { name: "McDonald's", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/330px-McDonald%27s_Golden_Arches.svg.png" },
+  { name: 'Mengniu' },
+  { name: 'Unilever', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e4/Unilever.svg/330px-Unilever.svg.png' },
+  { name: 'Verizon', logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/Verizon%202024.svg?width=300' },
+]
+
+function SponsorChip({ name, logo, tier1, noInvert }: { name: string; logo?: string; tier1?: boolean; noInvert?: boolean }) {
+  const [broken, setBroken] = useState(false)
+  return (
+    <span className={`sponsor ${tier1 ? 'tier1' : ''}`} title={name}>
+      {logo && !broken ? (
+        <img className={noInvert ? 'color' : ''} src={logo} alt={name} loading="lazy" onError={() => setBroken(true)} />
+      ) : (
+        name
+      )}
+    </span>
+  )
+}
+
 // Overlay exact minutes captured live on the client (the snapshot API only
 // keeps the last goal's minute — but we watch every goal as it happens).
 function withCapturedMinutes(
@@ -797,20 +830,14 @@ export default function App() {
       <section className="wc-sponsors">
         <span className="partners-label">FIFA World Cup 2026 · Official partners &amp; sponsors</span>
         <div className="partners-row">
-          {['Adidas', 'Coca-Cola', 'Hyundai–Kia', 'Visa', 'Qatar Airways', 'Aramco', 'Lenovo'].map((s) => (
-            <span key={s} className="sponsor tier1">
-              {s}
-            </span>
+          {WC_SPONSORS.filter((s) => s.tier1).map((s) => (
+            <SponsorChip key={s.name} {...s} />
           ))}
         </div>
         <div className="partners-row">
-          {['AB InBev', 'Bank of America', "Lay's", 'Hisense', "McDonald's", 'Mengniu', 'Unilever', 'Verizon'].map(
-            (s) => (
-              <span key={s} className="sponsor">
-                {s}
-              </span>
-            ),
-          )}
+          {WC_SPONSORS.filter((s) => !s.tier1).map((s) => (
+            <SponsorChip key={s.name} {...s} />
+          ))}
         </div>
       </section>
 
