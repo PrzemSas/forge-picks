@@ -1,0 +1,16 @@
+Forge Picks demo video — audio sources
+
+Mix: scripts/demo-video/mix-audio.sh
+Output: forge-picks-demo-with-audio.mp4
+
+Layers (live-broadcast style, quieter):
+1. BBC Newcastle sports radio excerpt (~75s loop) — archive.org, background murmur
+   https://archive.org/details/BBC_Newcastle_20170506_160000_North_East_Sport
+2. Mixkit #436 "Stadium crowd ambience" — distant crowd under commentary
+3. Mixkit #462 "Huge crowd cheering victory" — short goal stings
+4. Synthetic English commentary (Windows SAPI, generated locally) at kickoff/goals/FT
+
+Mixkit license: free commercial use — https://mixkit.co/license/#sfxFree
+Archive.org: check item license before reuse outside demo context.
+
+Regenerate commentary only: delete docs/audio/commentary/*.wav and rerun mix-audio.sh

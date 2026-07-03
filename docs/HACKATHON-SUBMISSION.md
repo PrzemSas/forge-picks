@@ -12,7 +12,7 @@
 |--|-----|
 | **Live app** | https://forge-picks.vercel.app |
 | **Repo** | https://github.com/PrzemSas/forge-picks |
-| **Demo video** | `forge-picks-demo.mp4` (local / YouTube — add link on submit) |
+| **Demo video** | https://youtu.be/H9vczXHdnFs |
 
 ---
 
@@ -68,7 +68,7 @@ React 19 · Vite · TypeScript · Vercel serverless (`api/*`) · shared `lib/txl
 
 ---
 
-## Demo video structure (~3 min, no audio — EN captions burned in)
+## Demo video structure (~3 min — EN captions + live-style sports audio)
 
 1. Title card  
 2. **Mock replay** — Germany vs Paraguay, full match, pick, goals, board reshuffle  
@@ -89,5 +89,5 @@ Aplikacja pod hackathon TxODDS: live MŚ 2026 z TxLINE → typ 1/X/2 → punkty 
 - [x] Live TxLINE (devnet, on-chain subscription)  
 - [x] Demo video ≤ 5 min  
 - [x] Brief doc (this file)  
-- [ ] Upload video (YouTube unlisted / public)  
+- [x] Upload video — https://youtu.be/H9vczXHdnFs  
 - [ ] Submit on [Superteam Earn](https://earn.superteam.fun) → Consumer & Fan Experiences
