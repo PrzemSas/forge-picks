@@ -755,12 +755,149 @@ header h1 .flame {
   border-color: var(--accent);
 }
 
+/* --- forge header: embers & molten glow --- */
+.forge-header {
+  position: relative;
+  padding: 1.4rem 1rem 1.6rem;
+  margin: -2rem -1rem 0;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 122, 26, 0.18);
+}
+
+.forge-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.forge-glow {
+  position: absolute;
+  left: 50%;
+  bottom: -60px;
+  transform: translateX(-50%);
+  width: 640px;
+  height: 140px;
+  background: radial-gradient(ellipse at center, rgba(255, 122, 26, 0.35), rgba(255, 60, 0, 0.12) 55%, transparent 75%);
+  filter: blur(6px);
+}
+
+.spark-p {
+  position: absolute;
+  bottom: -6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--spark);
+  opacity: 0;
+  animation: ember 4.2s linear infinite;
+}
+
+.spark-p:nth-child(odd) {
+  background: var(--accent);
+  width: 3px;
+  height: 3px;
+}
+
+.spark-p:nth-child(1) { left: 12%; animation-delay: 0s; animation-duration: 4.6s; }
+.spark-p:nth-child(2) { left: 21%; animation-delay: 1.3s; animation-duration: 3.8s; }
+.spark-p:nth-child(3) { left: 29%; animation-delay: 2.5s; animation-duration: 5s; }
+.spark-p:nth-child(4) { left: 36%; animation-delay: 0.7s; animation-duration: 4.1s; }
+.spark-p:nth-child(5) { left: 43%; animation-delay: 3.1s; animation-duration: 3.6s; }
+.spark-p:nth-child(6) { left: 49%; animation-delay: 1.9s; animation-duration: 4.8s; }
+.spark-p:nth-child(7) { left: 55%; animation-delay: 0.3s; animation-duration: 3.9s; }
+.spark-p:nth-child(8) { left: 61%; animation-delay: 2.2s; animation-duration: 4.4s; }
+.spark-p:nth-child(9) { left: 67%; animation-delay: 1.1s; animation-duration: 5.2s; }
+.spark-p:nth-child(10) { left: 74%; animation-delay: 3.6s; animation-duration: 3.7s; }
+.spark-p:nth-child(11) { left: 81%; animation-delay: 0.9s; animation-duration: 4.5s; }
+.spark-p:nth-child(12) { left: 88%; animation-delay: 2.8s; animation-duration: 4s; }
+.spark-p:nth-child(13) { left: 33%; animation-delay: 4s; animation-duration: 4.9s; }
+.spark-p:nth-child(14) { left: 58%; animation-delay: 4.4s; animation-duration: 4.2s; }
+
+@keyframes ember {
+  0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  8% { opacity: 0.9; }
+  60% { opacity: 0.7; }
+  100% { transform: translateY(-180px) translateX(14px) scale(0.4); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spark-p { animation: none; }
+}
+
+/* --- partners --- */
+.partners {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.partners-label {
+  display: block;
+  font-family: 'Chakra Petch', system-ui, sans-serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+
+.partners-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.partner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #141920;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s, transform 0.15s;
+}
+
+.partner:hover {
+  color: var(--text);
+  border-color: rgba(255, 122, 26, 0.5);
+  transform: translateY(-1px);
+}
+
+.partner img {
+  height: 18px;
+  width: auto;
+  max-width: 90px;
+  object-fit: contain;
+}
+
+.partner .p-invert {
+  filter: grayscale(1) brightness(1.9);
+}
+
+.partner-mono {
+  font-family: 'Chakra Petch', system-ui, sans-serif;
+  font-weight: 800;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: 5px;
+  padding: 0 0.25rem;
+  font-size: 0.72rem;
+}
+
 /* --- hub nav --- */
 .hub-nav {
   display: flex;
+  justify-content: center;
   gap: 0.4rem;
   margin-top: 0.8rem;
   flex-wrap: wrap;
+  position: relative;
 }
 
 .hub-nav a {

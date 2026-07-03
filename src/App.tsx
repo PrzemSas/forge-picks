@@ -405,7 +405,13 @@ export default function App() {
 
   return (
     <div className="app">
-      <header>
+      <header className="forge-header">
+        <div className="forge-bg" aria-hidden>
+          {Array.from({ length: 14 }, (_, i) => (
+            <span key={i} className="spark-p" />
+          ))}
+          <div className="forge-glow" />
+        </div>
         <p className="eyebrow">World Cup 2026 · Fan Picks</p>
         <h1>
           <span className="flame">🔥</span> Forge Picks
@@ -781,6 +787,31 @@ export default function App() {
           </div>
         </div>
       )}
+
+      <section className="partners">
+        <span className="partners-label">Powered by</span>
+        <div className="partners-row">
+          <a className="partner" href="https://txodds.com" target="_blank" rel="noreferrer">
+            <span className="partner-mono">Tx</span> TxLINE · TxODDS
+          </a>
+          <a className="partner" href="https://earn.superteam.fun" target="_blank" rel="noreferrer">
+            <img src="https://res.cloudinary.com/dgvnuwspr/image/upload/assets//hackathon/world-cup/logo.png" alt="" />
+            Superteam Earn
+          </a>
+          <a className="partner" href="https://solana.com" target="_blank" rel="noreferrer">
+            <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="" />
+            Solana Devnet
+          </a>
+          <a className="partner" href="https://www.thesportsdb.com" target="_blank" rel="noreferrer">
+            <img className="p-invert" src="https://www.thesportsdb.com/images/svg/site_logo_dark.svg" alt="" />
+            TheSportsDB
+          </a>
+          <a className="partner" href="https://gorweld.com" target="_blank" rel="noreferrer">
+            <img src="https://gorweld.com/icon-192.png" alt="" />
+            GorWeld
+          </a>
+        </div>
+      </section>
 
       <footer className="foot">
         <span>
