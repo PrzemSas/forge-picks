@@ -27,6 +27,10 @@ type Score = {
 type Outcome = 'home' | 'away' | 'draw'
 type Pick = { fixtureId: string; choice: Outcome }
 
+// Finished matches archived in localStorage — TxLINE's fixtures feed is a
+// rolling window of upcoming games, so results vanish from it after a day.
+type Archived = Fixture & { score: Score; archivedAt: number }
+
 const API = '/api'
 const POLL_MS = 2000
 
@@ -67,6 +71,13 @@ export default function App() {
       return JSON.parse(localStorage.getItem('forge-picks') || '[]')
     } catch {
       return []
+    }
+  })
+  const [archive, setArchive] = useState<Record<string, Archived>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('forge-results') || '{}')
+    } catch {
+      return {}
     }
   })
   const [txlineOk, setTxlineOk] = useState(false)
@@ -133,6 +144,26 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('forge-picks', JSON.stringify(picks))
   }, [picks])
+
+  // Archive finished matches (skip pure demo fixtures so mock replays don't pile up).
+  useEffect(() => {
+    const updates: Archived[] = []
+    for (const f of fixtures) {
+      const s = scores[f.id]
+      if (!s || s.status !== 'finished' || f.id.startsWith('wc-')) continue
+      const prev = archive[f.id]
+      if (prev && prev.score.home === s.home && prev.score.away === s.away && (prev.score.goals?.length ?? 0) >= (s.goals?.length ?? 0)) continue
+      updates.push({ ...f, status: 'finished', score: s, archivedAt: prev?.archivedAt ?? Date.now() })
+    }
+    if (updates.length > 0) {
+      setArchive((prev) => {
+        const next = { ...prev }
+        for (const u of updates) next[u.id] = u
+        localStorage.setItem('forge-results', JSON.stringify(next))
+        return next
+      })
+    }
+  }, [scores, fixtures, archive])
 
   // ?demo[=seconds] → auto-start the demo clock (shareable live-looking link / screenshots)
   useEffect(() => {
@@ -207,9 +238,14 @@ export default function App() {
     setPicks((prev) => [...prev.filter((p) => p.fixtureId !== selected.id), { fixtureId: selected.id, choice }])
   }
 
+  // Points survive the fixture dropping out of the TxLINE window: fall back to the archive.
   const myPoints = useMemo(
-    () => picks.reduce((sum, p) => sum + (outcomeOf(scores[p.fixtureId]) === p.choice ? 10 : 0), 0),
-    [picks, scores],
+    () =>
+      picks.reduce(
+        (sum, p) => sum + (outcomeOf(scores[p.fixtureId] ?? archive[p.fixtureId]?.score) === p.choice ? 10 : 0),
+        0,
+      ),
+    [picks, scores, archive],
   )
 
   const leaderboard = useMemo(() => {
@@ -226,6 +262,10 @@ export default function App() {
   }, [scores, myPoints])
 
   const nextUp = fixtures.filter((f) => (scores[f.id]?.status ?? f.status) === 'scheduled')
+  const history = useMemo(
+    () => Object.values(archive).sort((a, b) => b.kickoff.localeCompare(a.kickoff)),
+    [archive],
+  )
 
   return (
     <div className="app">
@@ -444,6 +484,52 @@ export default function App() {
           )}
         </section>
       </main>
+
+      {history.length > 0 && (
+        <section className="panel history">
+          <h2>Match history</h2>
+          <ul className="history-list">
+            {history.map((m) => {
+              const pick = picks.find((p) => p.fixtureId === m.id)
+              const out = outcomeOf(m.score)
+              return (
+                <li key={m.id}>
+                  <span className="h-date">{kickoffLabel(m.kickoff)}</span>
+                  <span className="h-match">
+                    <Flag name={m.home} size="w20" /> {m.home}
+                    <strong className="h-score">
+                      {m.score.home}–{m.score.away}
+                    </strong>
+                    {m.away} <Flag name={m.away} size="w20" />
+                  </span>
+                  {m.score.goals && m.score.goals.length > 0 && (
+                    <span className="h-goals">
+                      {m.score.goals
+                        .map(
+                          (g) =>
+                            `⚽ ${g.minute != null ? `${g.minute}'` : g.half ? `${g.half}H` : ''} ${
+                              g.scorer || (g.side === 'home' ? m.home : m.away)
+                            }`,
+                        )
+                        .join(' · ')}
+                    </span>
+                  )}
+                  <span className="h-meta">
+                    {m.round ?? 'World Cup'}
+                    {m.venue ? ` · 📍 ${m.venue}` : ''}
+                  </span>
+                  {pick && (
+                    <span className={`h-pick ${out === pick.choice ? 'win' : 'loss'}`}>
+                      {out === pick.choice ? '✓ +10' : '✗'} {teamOf(m, pick.choice)}
+                    </span>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+          <p className="hint small">Finished matches are kept on this device — the live feed only carries upcoming games.</p>
+        </section>
+      )}
 
       <footer className="foot">
         <span>

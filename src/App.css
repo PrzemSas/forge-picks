@@ -752,6 +752,96 @@ header h1 .flame {
   border-color: var(--accent);
 }
 
+/* --- match history --- */
+.history {
+  margin-top: 1rem;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.history-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.15rem;
+  padding: 0.55rem 0.7rem;
+  background: #141920;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+
+.history-list .h-date {
+  color: var(--muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.history-list .h-match {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  flex-wrap: wrap;
+}
+
+.history-list .h-score {
+  font-family: 'Chakra Petch', system-ui, sans-serif;
+  color: var(--spark);
+  font-size: 1rem;
+  padding: 0 0.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-list .h-goals {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.history-list .h-meta {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.history-list .h-pick {
+  grid-column: 3;
+  grid-row: 1;
+  font-weight: 700;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.history-list .h-pick.win {
+  color: var(--win);
+}
+
+.history-list .h-pick.loss {
+  color: var(--loss);
+}
+
+@media (max-width: 560px) {
+  .history-list li {
+    grid-template-columns: 1fr auto;
+  }
+  .history-list .h-date,
+  .history-list .h-goals,
+  .history-list .h-meta {
+    grid-column: 1;
+  }
+  .history-list .h-pick {
+    grid-column: 2;
+  }
+}
+
 /* --- footer --- */
 .foot {
   margin-top: 2rem;
