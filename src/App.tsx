@@ -33,7 +33,7 @@ const FINAL_DATE = '2026-07-19'
 const BONUS_CHAMPION = 50
 const BONUS_FINALIST = 25
 
-type Outcome = 'home' | 'away' | 'draw'
+type Outcome = 'home' | 'away'
 type Pick = { fixtureId: string; choice: Outcome }
 
 // Finished matches archived in localStorage — TxLINE's fixtures feed is a
@@ -50,7 +50,7 @@ const POLL_MS = 2000
 const RIVALS: { name: string; base: number; live: Outcome }[] = [
   { name: 'Blacksmith_Ada', base: 20, live: 'home' },
   { name: 'MoltenMara', base: 20, live: 'away' },
-  { name: 'AnvilKid', base: 10, live: 'draw' },
+  { name: 'AnvilKid', base: 10, live: 'away' },
 ]
 
 const LIVE_ID = 'wc-r16-2'
@@ -115,7 +115,7 @@ function outcomeOf(s: Score | undefined): Outcome | null {
   if (!s || s.status !== 'finished') return null
   if (s.home > s.away) return 'home'
   if (s.away > s.home) return 'away'
-  return 'draw'
+  return null // no draws in this tournament — a level score is unresolved (ET/pens)
 }
 
 // Render a shareable "forge card" as a PNG — the app's steel/torch palette,
@@ -455,7 +455,7 @@ export default function App() {
   const fPick = featured ? picks.find((p) => p.fixtureId === featured.id) : undefined
 
   function teamOf(fx: Fixture, choice: Outcome) {
-    return choice === 'home' ? fx.home : choice === 'away' ? fx.away : 'Draw'
+    return choice === 'home' ? fx.home : fx.away
   }
 
   function makePick(choice: Outcome) {
@@ -816,7 +816,7 @@ export default function App() {
               )}
 
               <div className="pick-row">
-                {(['home', 'draw', 'away'] as Outcome[]).map((c) => (
+                {(['home', 'away'] as Outcome[]).map((c) => (
                   <button
                     key={c}
                     type="button"
@@ -824,7 +824,7 @@ export default function App() {
                     disabled={selectedScore?.status === 'finished'}
                     onClick={() => makePick(c)}
                   >
-                    {c === 'home' ? selected.home : c === 'away' ? selected.away : 'Draw'}
+                    {c === 'home' ? selected.home : selected.away}
                   </button>
                 ))}
               </div>
