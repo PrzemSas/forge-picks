@@ -1186,6 +1186,51 @@ header h1 .flame {
   transform: translateY(-1px);
 }
 
+.team-chip.fav {
+  border-color: var(--accent);
+  background: rgba(255, 122, 26, 0.12);
+  box-shadow: 0 0 12px -6px var(--accent);
+}
+
+.chip-star {
+  color: var(--spark);
+}
+
+.fav-btn {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.fav-btn.on {
+  color: var(--spark);
+  border-color: var(--accent);
+}
+
+.my-nation {
+  width: 100%;
+  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: rgba(255, 122, 26, 0.1);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;

@@ -225,6 +225,8 @@ export default function App() {
   // Finished matches from the server — same on every device, unlike the
   // per-browser `archive`. Merged into `history` below.
   const [serverHistory, setServerHistory] = useState<Record<string, Archived>>({})
+  // The player's nation — starred anywhere it appears, kept per device.
+  const [fav, setFav] = useState<string | null>(() => localStorage.getItem('forge-fav') || null)
   const [txlineOk, setTxlineOk] = useState(false)
   const [goalMins, setGoalMins] = useState<Record<string, Record<string, number>>>(() => {
     try {
@@ -405,6 +407,11 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('forge-forecast', JSON.stringify(forecast))
   }, [forecast])
+
+  useEffect(() => {
+    if (fav) localStorage.setItem('forge-fav', fav)
+    else localStorage.removeItem('forge-fav')
+  }, [fav])
 
   // Squad viewer (TheSportsDB via /api/squad)
   useEffect(() => {
@@ -866,6 +873,11 @@ export default function App() {
           <button type="button" className="share-btn" onClick={share}>
             🔥 Share my forge card
           </button>
+          {fav && (
+            <button type="button" className="my-nation" onClick={() => setSquadTeam(fav)}>
+              ★ Your nation: <Flag name={fav} size="w20" /> {fav}
+            </button>
+          )}
           {nextUp.length > 0 && (
             <div className="next-up">
               <h3>Next up</h3>
@@ -933,8 +945,14 @@ export default function App() {
           <h2>Teams</h2>
           <div className="teams-grid">
             {allTeams.map((t) => (
-              <button key={t} type="button" className="team-chip" onClick={() => setSquadTeam(t)}>
+              <button
+                key={t}
+                type="button"
+                className={`team-chip ${fav === t ? 'fav' : ''}`}
+                onClick={() => setSquadTeam(t)}
+              >
                 <Flag name={t} size="w20" /> {t}
+                {fav === t && <span className="chip-star">★</span>}
               </button>
             ))}
           </div>
@@ -948,6 +966,14 @@ export default function App() {
             <div className="modal-head">
               <Flag name={squadTeam} size="w40" />
               <h3>{squadTeam}</h3>
+              <button
+                type="button"
+                className={`fav-btn ${fav === squadTeam ? 'on' : ''}`}
+                onClick={() => setFav(fav === squadTeam ? null : squadTeam)}
+                title={fav === squadTeam ? 'Remove my nation' : 'Set as my nation'}
+              >
+                {fav === squadTeam ? '★ My nation' : '☆ My nation'}
+              </button>
               <button type="button" className="modal-x" onClick={() => setSquadTeam(null)}>
                 ✕
               </button>
