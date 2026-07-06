@@ -118,6 +118,86 @@ function outcomeOf(s: Score | undefined): Outcome | null {
   return 'draw'
 }
 
+// Render a shareable "forge card" as a PNG — the app's steel/torch palette,
+// the player's points, record and champion pick. Returns a Blob (or null if
+// the canvas isn't available).
+function drawShareCard(stats: {
+  points: number
+  calls: number
+  wins: number
+  champion: string | null
+}): Promise<Blob | null> {
+  const S = 1080
+  const canvas = document.createElement('canvas')
+  canvas.width = S
+  canvas.height = S
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return Promise.resolve(null)
+
+  const bg = ctx.createLinearGradient(0, 0, S, S)
+  bg.addColorStop(0, '#161b22')
+  bg.addColorStop(1, '#12161c')
+  ctx.fillStyle = bg
+  ctx.fillRect(0, 0, S, S)
+
+  // spark flecks
+  ctx.fillStyle = 'rgba(255, 210, 63, 0.5)'
+  for (let i = 0; i < 40; i++) {
+    const x = (i * 137.5) % S
+    const y = (i * 89.3) % S
+    ctx.globalAlpha = 0.1 + ((i * 7) % 10) / 20
+    ctx.beginPath()
+    ctx.arc(x, y, 1 + (i % 3), 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.globalAlpha = 1
+
+  // torch accent bar
+  ctx.fillStyle = '#ff7a1a'
+  ctx.fillRect(90, 150, 120, 12)
+
+  const center = (text: string, y: number, font: string, color: string) => {
+    ctx.font = font
+    ctx.fillStyle = color
+    ctx.textAlign = 'center'
+    ctx.fillText(text, S / 2, y)
+  }
+
+  ctx.textAlign = 'left'
+  ctx.font = '700 46px system-ui, sans-serif'
+  ctx.fillStyle = '#f2f6fa'
+  ctx.fillText('🔥 FORGE PICKS', 90, 130)
+
+  center(String(stats.points), 560, '800 340px system-ui, sans-serif', '#ffd23f')
+  center('POINTS ON THE FORGE BOARD', 640, '700 34px system-ui, sans-serif', '#b7c2cc')
+
+  const record =
+    stats.calls > 0 ? `${stats.wins}/${stats.calls} calls correct` : 'No calls yet — join the forge'
+  center(record, 730, '600 40px system-ui, sans-serif', '#f2f6fa')
+
+  if (stats.champion) {
+    ctx.textAlign = 'center'
+    ctx.font = '700 42px system-ui, sans-serif'
+    const label = `🏆 Champion: ${stats.champion}`
+    const w = ctx.measureText(label).width + 80
+    const x = (S - w) / 2
+    ctx.fillStyle = 'rgba(255, 122, 26, 0.14)'
+    ctx.strokeStyle = '#ff7a1a'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.roundRect(x, 800, w, 84, 42)
+    ctx.fill()
+    ctx.stroke()
+    ctx.fillStyle = '#f2f6fa'
+    ctx.fillText(label, S / 2, 856)
+  }
+
+  center('World Cup 2026 · Live on TxLINE', 980, '600 30px system-ui, sans-serif', '#b7c2cc')
+  center('forge-picks.vercel.app', 1025, '700 34px system-ui, sans-serif', '#4cc3ff')
+
+  return new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/png'))
+}
+
 function Flag({ name, size = 'w40' }: { name: string; size?: 'w20' | 'w40' | 'w80' | 'w160' }) {
   const url = flagUrl(name, size)
   if (!url) return <span className="flag flag-blank" aria-hidden />
@@ -424,12 +504,46 @@ export default function App() {
     [picks, scores, archive, forecastBonus],
   )
 
-  const share = useCallback(() => {
-    const parts = [`🔥 Forge Picks — ${myPoints} pts on the World Cup forge board (${picks.length} calls).`]
-    if (forecast.champion) parts.push(`My champion: ${forecast.champion} 🏆`)
-    parts.push('https://forge-picks.vercel.app')
-    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(parts.join(' '))}`, '_blank', 'noopener')
-  }, [picks, myPoints, forecast])
+  const share = useCallback(async () => {
+    const wins = picks.reduce(
+      (n, p) => n + (outcomeOf(scores[p.fixtureId] ?? archive[p.fixtureId]?.score) === p.choice ? 1 : 0),
+      0,
+    )
+    const text = `🔥 Forge Picks — ${myPoints} pts on the World Cup forge board (${picks.length} calls${
+      forecast.champion ? `, champion ${forecast.champion} 🏆` : ''
+    }). https://forge-picks.vercel.app`
+
+    let blob: Blob | null = null
+    try {
+      blob = await drawShareCard({ points: myPoints, calls: picks.length, wins, champion: forecast.champion })
+    } catch {
+      /* canvas unavailable — fall back to text share */
+    }
+
+    // Mobile: native share sheet carries the image + text.
+    if (blob && typeof navigator.canShare === 'function') {
+      const file = new File([blob], 'forge-picks.png', { type: 'image/png' })
+      if (navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], text })
+          return
+        } catch {
+          return // user dismissed the sheet
+        }
+      }
+    }
+
+    // Desktop / no file-share: download the card, then open X with the text.
+    if (blob) {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'forge-picks.png'
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 4000)
+    }
+    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener')
+  }, [picks, myPoints, forecast, scores, archive])
 
   const leaderboard = useMemo(() => {
     const liveOut = outcomeOf(scores[LIVE_ID])
@@ -750,7 +864,7 @@ export default function App() {
             ))}
           </ol>
           <button type="button" className="share-btn" onClick={share}>
-            𝕏 Share my forge
+            🔥 Share my forge card
           </button>
           {nextUp.length > 0 && (
             <div className="next-up">
