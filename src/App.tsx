@@ -142,6 +142,9 @@ export default function App() {
       return {}
     }
   })
+  // Finished matches from the server — same on every device, unlike the
+  // per-browser `archive`. Merged into `history` below.
+  const [serverHistory, setServerHistory] = useState<Record<string, Archived>>({})
   const [txlineOk, setTxlineOk] = useState(false)
   const [goalMins, setGoalMins] = useState<Record<string, Record<string, number>>>(() => {
     try {
@@ -186,6 +189,30 @@ export default function App() {
         setSelectedId((cur) => cur ?? list.find((f) => f.status === 'live')?.id ?? list[0]?.id ?? null)
       })
       .catch(console.error)
+  }, [])
+
+  // Server-side match history — identical across devices. Refreshed on a slow
+  // cadence so newly-finished matches appear without a reload.
+  useEffect(() => {
+    let alive = true
+    const load = () =>
+      fetch(`${API}/history`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (!alive) return
+          const map: Record<string, Archived> = {}
+          for (const m of (d.matches ?? []) as Archived[]) {
+            map[m.id] = { ...m, archivedAt: Date.parse(m.kickoff) || Date.now() }
+          }
+          setServerHistory(map)
+        })
+        .catch(() => {})
+    load()
+    const t = setInterval(load, 90_000)
+    return () => {
+      alive = false
+      clearInterval(t)
+    }
   }, [])
 
   // Live polling — the app comes alive during a match.
@@ -418,9 +445,15 @@ export default function App() {
   }, [scores, myPoints])
 
   const nextUp = fixtures.filter((f) => (scores[f.id]?.status ?? f.status) === 'scheduled')
+  // Server history is authoritative (same on every device); the local archive
+  // supplements it with matches this browser saw finish that have since dropped
+  // out of the TxLINE window.
   const history = useMemo(
-    () => Object.values(archive).sort((a, b) => b.kickoff.localeCompare(a.kickoff)),
-    [archive],
+    () =>
+      Object.values({ ...archive, ...serverHistory }).sort((a, b) =>
+        b.kickoff.localeCompare(a.kickoff),
+      ),
+    [archive, serverHistory],
   )
   // Every nation seen in the feed or the archive — tap one for its squad.
   const allTeams = useMemo(() => {
