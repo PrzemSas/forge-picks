@@ -108,7 +108,9 @@ function withCapturedMinutes(
 function kickoffLabel(iso: string): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return 'Upcoming'
-  return d.toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+  // Force en-GB so dates read the same language as the (English) UI for every
+  // visitor — the viewer's own timezone is still used for the clock.
+  return d.toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
 function outcomeOf(s: Score | undefined): Outcome | null {
