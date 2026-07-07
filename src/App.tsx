@@ -936,7 +936,7 @@ export default function App() {
               )
             })}
           </ul>
-          <p className="hint small">Finished matches are kept on this device — the live feed only carries upcoming games.</p>
+          <p className="hint small">Results sync across your devices via TxLINE — the live feed itself only carries upcoming games.</p>
         </section>
       )}
 
@@ -1021,19 +1021,44 @@ export default function App() {
             <span className="partner-mono">Tx</span> TxLINE · TxODDS
           </a>
           <a className="partner" href="https://earn.superteam.fun" target="_blank" rel="noreferrer">
-            <img src="https://res.cloudinary.com/dgvnuwspr/image/upload/assets//hackathon/world-cup/logo.png" alt="" />
+            <img
+              src="https://res.cloudinary.com/dgvnuwspr/image/upload/assets//hackathon/world-cup/logo.png"
+              alt=""
+              onError={(e) => {
+                e.currentTarget.style.display = 'none'
+              }}
+            />
             Superteam Earn
           </a>
           <a className="partner" href="https://solana.com" target="_blank" rel="noreferrer">
-            <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="" />
+            <img
+              src="https://cryptologos.cc/logos/solana-sol-logo.png"
+              alt=""
+              onError={(e) => {
+                e.currentTarget.style.display = 'none'
+              }}
+            />
             Solana Devnet
           </a>
           <a className="partner" href="https://www.thesportsdb.com" target="_blank" rel="noreferrer">
-            <img className="p-invert" src="https://www.thesportsdb.com/images/svg/site_logo_dark.svg" alt="" />
+            <img
+              className="p-invert"
+              src="https://www.thesportsdb.com/images/svg/site_logo_dark.svg"
+              alt=""
+              onError={(e) => {
+                e.currentTarget.style.display = 'none'
+              }}
+            />
             TheSportsDB
           </a>
           <a className="partner" href="https://gorweld.com" target="_blank" rel="noreferrer">
-            <img src="https://gorweld.com/icon-192.png" alt="" />
+            <img
+              src="https://gorweld.com/icon-192.png"
+              alt=""
+              onError={(e) => {
+                e.currentTarget.style.display = 'none'
+              }}
+            />
             GorWeld
           </a>
         </div>
