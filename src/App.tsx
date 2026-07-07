@@ -43,6 +43,30 @@ type Archived = Fixture & { score: Score; archivedAt: number }
 type SquadPlayer = { name: string; position: string; number: string; img: string | null }
 type Squad = { team: string; badge?: string | null; players: SquadPlayer[] }
 
+// Whole-tournament view (from TheSportsDB, not the rolling TxLINE window).
+type TournamentMatch = {
+  id: string
+  home: string
+  away: string
+  homeScore: number | null
+  awayScore: number | null
+  round: string
+  roundOrder: number
+  date: string | null
+  time: string
+  venue: string | null
+  status: 'finished' | 'scheduled'
+}
+type Standing = {
+  team: string
+  furthest: string
+  furthestOrder: number
+  eliminatedRound: string | null
+  eliminatedBy: string | null
+  eliminatedDate: string | null
+  champion: boolean
+}
+
 const API = '/api'
 const POLL_MS = 2000
 
@@ -244,6 +268,10 @@ export default function App() {
       return { champion: null, runnerUp: null }
     }
   })
+  const [tournament, setTournament] = useState<{ matches: TournamentMatch[]; standings: Standing[] }>({
+    matches: [],
+    standings: [],
+  })
   const [squadTeam, setSquadTeam] = useState<string | null>(null)
   const [squad, setSquad] = useState<Squad | null>(null)
   const [squadLoading, setSquadLoading] = useState(false)
@@ -289,6 +317,25 @@ export default function App() {
             map[m.id] = { ...m, archivedAt: Date.parse(m.kickoff) || Date.now() }
           }
           setServerHistory(map)
+        })
+        .catch(() => {})
+    load()
+    const t = setInterval(load, 90_000)
+    return () => {
+      alive = false
+      clearInterval(t)
+    }
+  }, [])
+
+  // Whole-tournament feed (all matches + team-progress ranking), refreshed slowly.
+  useEffect(() => {
+    let alive = true
+    const load = () =>
+      fetch(`${API}/tournament`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (!alive) return
+          setTournament({ matches: d.matches ?? [], standings: d.standings ?? [] })
         })
         .catch(() => {})
     load()
@@ -592,6 +639,21 @@ export default function App() {
     return [...names].sort((a, b) => a.localeCompare(b))
   }, [fixtures, history])
 
+  // Rounds ordered deepest-first (Final → Group stage) for the tournament view.
+  const tourRounds = useMemo(() => {
+    const order = new Map<string, number>()
+    for (const m of tournament.matches) order.set(m.round, m.roundOrder)
+    return [...order.entries()].sort((a, b) => b[1] - a[1]).map(([r]) => r)
+  }, [tournament])
+  const knockoutStandings = useMemo(
+    () => tournament.standings.filter((s) => s.furthestOrder >= 2),
+    [tournament],
+  )
+  const groupStandings = useMemo(
+    () => tournament.standings.filter((s) => s.furthestOrder < 2),
+    [tournament],
+  )
+
   return (
     <div className="app">
       <header className="forge-header">
@@ -612,6 +674,7 @@ export default function App() {
         <nav className="hub-nav">
           <a href="#matches">Matches</a>
           <a href="#final">Final</a>
+          <a href="#tournament">Tournament</a>
           <a href="#history">History</a>
           <a href="#teams">Teams</a>
         </nav>
@@ -895,6 +958,82 @@ export default function App() {
           )}
         </section>
       </main>
+
+      {tournament.matches.length > 0 && (
+        <section className="panel tournament" id="tournament">
+          <h2>Tournament</h2>
+          <p className="hint small">The full bracket from TheSportsDB — every match and how far each nation got, beyond the live TxLINE window.</p>
+
+          <h3 className="tour-h">⚔ Road so far</h3>
+          {knockoutStandings.length > 0 ? (
+            <ol className="progress-list">
+              {knockoutStandings.map((s, i) => (
+                <li
+                  key={s.team}
+                  className={s.champion ? 'champ' : s.eliminatedRound ? 'out' : 'alive'}
+                >
+                  <span className="p-rank">{i + 1}</span>
+                  <Flag name={s.team} size="w20" />
+                  <span className="p-team">{s.team}</span>
+                  <span className="p-round">{s.furthest}</span>
+                  <span className="p-status">
+                    {s.champion
+                      ? '🏆 Champion'
+                      : s.eliminatedRound
+                        ? `Out · lost to ${s.eliminatedBy}`
+                        : '● Still in'}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="hint small">Knockouts haven’t started yet — everyone’s still in the group stage.</p>
+          )}
+          {groupStandings.length > 0 && (
+            <div className="group-out">
+              <span className="go-label">Group stage ({groupStandings.length})</span>
+              <div className="go-teams">
+                {groupStandings.map((s) => (
+                  <span key={s.team} className="go-team">
+                    <Flag name={s.team} size="w20" /> {s.team}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <h3 className="tour-h">📅 All matches</h3>
+          {tourRounds.map((round) => (
+            <div key={round} className="round-block">
+              <h4 className="round-h">{round}</h4>
+              <ul className="tour-list">
+                {tournament.matches
+                  .filter((m) => m.round === round)
+                  .map((m) => (
+                    <li key={m.id}>
+                      <span className="t-date">
+                        {m.date
+                          ? new Date(`${m.date}T${m.time || '00:00'}`).toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'short',
+                            })
+                          : ''}
+                      </span>
+                      <span className="t-match">
+                        <Flag name={m.home} size="w20" /> {m.home}
+                        <strong className="t-score">
+                          {m.status === 'finished' ? `${m.homeScore}–${m.awayScore}` : m.time || 'v'}
+                        </strong>
+                        {m.away} <Flag name={m.away} size="w20" />
+                      </span>
+                      {m.venue && <span className="t-venue">📍 {m.venue}</span>}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          ))}
+        </section>
+      )}
 
       {history.length > 0 && (
         <section className="panel history" id="history">

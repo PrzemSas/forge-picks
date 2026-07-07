@@ -1458,3 +1458,163 @@ header h1 .flame {
     order: -1;
   }
 }
+
+/* ── Tournament ─────────────────────────────────────────── */
+.tournament .tour-h {
+  margin: 1.4rem 0 0.6rem;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+.progress-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.progress-list li {
+  display: grid;
+  grid-template-columns: 1.6rem 1.25rem 1fr auto auto;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.7rem;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line);
+  border-radius: 8px;
+}
+.progress-list li.alive {
+  border-left-color: var(--arc);
+}
+.progress-list li.out {
+  border-left-color: var(--loss);
+  opacity: 0.82;
+}
+.progress-list li.champ {
+  border-left-color: var(--spark);
+  background: linear-gradient(90deg, rgba(255, 210, 63, 0.12), var(--bg2));
+}
+.progress-list .p-rank {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.progress-list .p-team {
+  font-weight: 600;
+  color: var(--text);
+}
+.progress-list .p-round {
+  padding: 0.1rem 0.5rem;
+  background: var(--steel);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  white-space: nowrap;
+}
+.progress-list .p-status {
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: right;
+}
+.progress-list li.alive .p-status {
+  color: var(--arc);
+}
+.progress-list li.champ .p-status {
+  color: var(--spark);
+  font-weight: 700;
+}
+
+.group-out {
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed var(--line);
+}
+.group-out .go-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+.go-teams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.go-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--steel);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.round-block {
+  margin-top: 0.9rem;
+}
+.round-block .round-h {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.tour-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.tour-list li {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+.tour-list .t-date {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.tour-list .t-match {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.tour-list .t-score {
+  padding: 0.05rem 0.45rem;
+  background: var(--steel);
+  border-radius: 6px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.tour-list .t-venue {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: right;
+}
+@media (max-width: 899px) {
+  .tour-list li {
+    grid-template-columns: 2.8rem 1fr;
+  }
+  .tour-list .t-venue {
+    display: none;
+  }
+  .progress-list li {
+    grid-template-columns: 1.4rem 1.25rem 1fr auto;
+  }
+  .progress-list .p-round {
+    display: none;
+  }
+}
