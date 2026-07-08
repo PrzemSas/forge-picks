@@ -723,6 +723,23 @@ export default function App() {
         </section>
       )}
 
+      {featured && (
+        <section className="mini-board" aria-label="Forge Board — live standings">
+          <span className="mb-label">🔥 Forge Board</span>
+          <ol className="mb-list">
+            {leaderboard.map((row, i) => (
+              <li key={row.name} className={row.you ? 'you' : ''}>
+                <span className="mb-rank">{i + 1}</span>
+                <span className="mb-name">{row.name}</span>
+                <strong>{row.points}</strong>
+              </li>
+            ))}
+          </ol>
+          {celebrate && <span className="mb-plus">+10 ⚒</span>}
+          <a className="mb-jump" href="#matches">full board ↓</a>
+        </section>
+      )}
+
       <section className="final-banner" id="final">
         <div className="fb-inner">
           <span className="fb-tag">🏆 The Final · Sunday, 19 July 2026</span>

@@ -589,6 +589,97 @@ header h1 .flame {
   100% { opacity: 0; transform: translateY(-28px); }
 }
 
+/* --- mini forge board (live standings under the hero) --- */
+.mini-board {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.9rem;
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.9rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.mb-label {
+  font-family: 'Chakra Petch', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--spark);
+  white-space: nowrap;
+}
+
+.mb-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+
+.mb-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg2);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.mb-list li .mb-rank {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
+}
+
+.mb-list li strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.mb-list li.you {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.mb-list li.you strong {
+  color: var(--accent);
+}
+
+.mb-list li.you .mb-name::after {
+  content: ' ⚒';
+}
+
+.mb-jump {
+  font-size: 0.72rem;
+  color: var(--arc);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mb-jump:hover {
+  text-decoration: underline;
+}
+
+.mb-plus {
+  position: absolute;
+  top: -0.4rem;
+  right: 1rem;
+  color: var(--win);
+  font-family: 'Chakra Petch', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  pointer-events: none;
+  animation: floatup 1.4s ease forwards;
+  z-index: 3;
+}
+
 /* --- goals timeline --- */
 .goals {
   list-style: none;
