@@ -32,7 +32,7 @@ Fans juggle tabs: fixtures, live score, their prediction, friends’ takes. TxLI
 
 ## Solution
 
-1. **Pick** — home / draw / away for the featured match (+10 forge points if correct at full time).
+1. **Pick** — home or away for the featured match (+10 forge points if correct at full time).
 2. **Watch** — hero card polls TxLINE every ~2s; goals trigger banner, score pop, hero flash.
 3. **Dig** — goal timeline with scorer, minute, club, Transfermarkt lookup (national-team goals ≠ everyday club).
 4. **Compete** — Forge Board reshuffles when results settle; match history persists locally.
@@ -80,7 +80,7 @@ React 19 · Vite · TypeScript · Vercel serverless (`api/*`) · shared `lib/txl
 
 ## PL — skrót dla buildera
 
-Aplikacja pod hackathon TxODDS: live MŚ 2026 z TxLINE → typ 1/X/2 → punkty → leaderboard. Wideo najpierw pokazuje demo (mock), potem produkcję z prawdziwym feedem. Tekst pod upload: [`VIDEO-UPLOAD.txt`](./VIDEO-UPLOAD.txt).
+Aplikacja pod hackathon TxODDS: live MŚ 2026 z TxLINE → typ 1/2 → punkty → leaderboard. Wideo najpierw pokazuje demo (mock), potem produkcję z prawdziwym feedem. Tekst pod upload: [`VIDEO-UPLOAD.txt`](./VIDEO-UPLOAD.txt).
 
 ---
 

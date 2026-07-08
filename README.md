@@ -12,7 +12,7 @@ Built for **Superteam Earn × TxODDS** — _Consumer & Fan Experiences_ track.
 ## What it does — a full World Cup fan hub
 
 - **Live hero** — the featured match with flags, real venue, live score and a 0–90' progress bar.
-- **Pick & settle** — call home / draw / away; picks resolve against the real result for **+10 forge points**.
+- **Pick & settle** — call home or away; picks resolve against the real result for **+10 forge points**.
 - **Final Forecast** — pick the champion (+50) and runner-up (+25); settles after the MetLife final on 19 July, with FIFA prize-pool context ($871M — $50M champion / $33M runner-up).
 - **Match history** — finished matches are archived client-side (the TxLINE feed is a rolling window of upcoming games), with score, goal timeline and your pick verdict — points never expire.
 - **Live match stats** — corners and cards straight from the TxLINE event feed.
