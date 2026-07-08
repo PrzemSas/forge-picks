@@ -94,7 +94,7 @@ const WC_SPONSORS: { name: string; logo?: string; tier1?: boolean; noInvert?: bo
   { name: "Lay's", noInvert: true, logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Lay%27s_2025.svg/330px-Lay%27s_2025.svg.png" },
   { name: 'Hisense', logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hisense%20logo.svg?width=300' },
   { name: "McDonald's", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/330px-McDonald%27s_Golden_Arches.svg.png" },
-  { name: 'Mengniu' },
+  { name: 'Mengniu', logo: '/mengniu.svg' },
   { name: 'Unilever', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e4/Unilever.svg/330px-Unilever.svg.png' },
   { name: 'Verizon', logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/Verizon%202024.svg?width=300' },
 ]
