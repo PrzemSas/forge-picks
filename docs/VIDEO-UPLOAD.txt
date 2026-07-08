@@ -7,7 +7,7 @@ Forge Picks — Live TxLINE World Cup fan picks | Superteam Earn × TxODDS
 === DESCRIPTION (paste as-is) ===
 Forge Picks turns live World Cup scores from TxLINE into a simple fan pick game.
 
-Pick home, draw, or away → watch the match update every 2 seconds → earn forge points when you're right → climb the Forge Board.
+Pick home or away — knockout only, no draws (ties go to extra time / pens) → watch the match update every 2 seconds → earn forge points when you're right → climb the Forge Board.
 
 Built for Superteam Earn × TxODDS — Consumer & Fan Experiences track.
 

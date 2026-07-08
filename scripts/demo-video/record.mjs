@@ -101,11 +101,11 @@ async function clipA(browser) {
   await sleep(page, 1600)
 
   // S2 — select match + pick
-  await cap(page, 'Pick a match — I’ll take Germany vs Paraguay — and make your call: home, draw, or away.')
+  await cap(page, 'Pick a match — I’ll take Germany vs Paraguay — and make your call: home or away. Knockout rules, no draw.')
   await clickAt(page, '.fixtures button:has-text("Germany")')
   await sleep(page, 1500)
   await scrollToEl(page, '.pick-panel')
-  await moveTo(page, '.pick-row button:has-text("Draw")')
+  await moveTo(page, '.pick-row button:has-text("Germany")')
   await sleep(page, 700)
   await moveTo(page, '.pick-row button:has-text("Paraguay")')
   await sleep(page, 700)

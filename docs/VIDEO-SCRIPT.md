@@ -24,7 +24,7 @@
 
 **Ekran:** wybierz **Germany vs Paraguay**, najedź na trzy przyciski, kliknij swój typ.
 
-> "Every match, you make one call — **home, draw, or away**. I'll back Germany. If the final result matches my pick, I earn **ten forge points** on the board. That's the whole game — simple on purpose."
+> "Every match, you make one call — **home or away**. Knockout football: no draw button, because ties go to extra time and penalties until someone wins. I'll back Germany. If the final result matches my pick, I earn **ten forge points** on the board. That's the whole game — simple on purpose."
 
 ## Scena 3 — Mecz na żywo (0:50–2:20)
 

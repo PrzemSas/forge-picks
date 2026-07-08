@@ -32,7 +32,7 @@ Fans juggle tabs: fixtures, live score, their prediction, friends’ takes. TxLI
 
 ## Solution
 
-1. **Pick** — home or away for the featured match (+10 forge points if correct at full time).
+1. **Pick** — home or away for the featured match (+10 forge points if correct at full time). Knockout bracket only: no draw option — level scores go to extra time / penalties, so the winner is always one side.
 2. **Watch** — hero card polls TxLINE every ~2s; goals trigger banner, score pop, hero flash.
 3. **Dig** — goal timeline with scorer, minute, club, Transfermarkt lookup (national-team goals ≠ everyday club).
 4. **Compete** — Forge Board reshuffles when results settle; match history persists locally.
