@@ -1730,11 +1730,6 @@ header h1 .flame {
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
-.tour-list .t-goal-unknown {
-  opacity: 0.6;
-  font-style: italic;
-  cursor: help;
-}
 @media (max-width: 899px) {
   .tour-list li {
     grid-template-columns: 2.8rem 1fr;

@@ -56,11 +56,10 @@ type TournamentMatch = {
   time: string
   venue: string | null
   status: 'finished' | 'scheduled'
-  // Named goals from TheSportsDB's timeline, plus how many goals it couldn't
-  // name — their timelines are partial, and a short list without that count
-  // reads as a bug rather than a source limit.
+  // Named goals from TheSportsDB's timeline. Their timelines are partial, so
+  // this is often shorter than the score — the gap is explained once above the
+  // list rather than on every row.
   scorers?: { name: string; minute: number | null; home: boolean }[]
-  unnamedGoals?: number
 }
 type Standing = {
   team: string
@@ -650,6 +649,19 @@ export default function App() {
     for (const m of tournament.matches) order.set(m.round, m.roundOrder)
     return [...order.entries()].sort((a, b) => b[1] - a[1]).map(([r]) => r)
   }, [tournament])
+  // TheSportsDB's timelines name roughly half the goals, so most rows would
+  // otherwise carry a "some goals unnamed" caveat. Say it once, with the real
+  // numbers, and let the rows just show the goals we know.
+  const goalCoverage = useMemo(() => {
+    let total = 0
+    let named = 0
+    for (const m of tournament.matches) {
+      if (m.status !== 'finished') continue
+      total += (m.homeScore ?? 0) + (m.awayScore ?? 0)
+      named += m.scorers?.length ?? 0
+    }
+    return { total, named }
+  }, [tournament])
   const knockoutStandings = useMemo(
     () => tournament.standings.filter((s) => s.furthestOrder >= 2),
     [tournament],
@@ -1025,6 +1037,12 @@ export default function App() {
           )}
 
           <h3 className="tour-h">📅 All matches</h3>
+          {goalCoverage.named < goalCoverage.total && (
+            <p className="hint small">
+              TheSportsDB names {goalCoverage.named} of the {goalCoverage.total} goals played so far —
+              the rest appear here without a scorer.
+            </p>
+          )}
           {tourRounds.map((round) => (
             <div key={round} className="round-block">
               <h4 className="round-h">{round}</h4>
@@ -1062,14 +1080,6 @@ export default function App() {
                               {g.minute != null && <em> {g.minute}'</em>}
                             </span>
                           ))}
-                          {m.unnamedGoals ? (
-                            <span
-                              className="t-goal t-goal-unknown"
-                              title="TheSportsDB's timeline doesn't name every goal in this match"
-                            >
-                              +{m.unnamedGoals} unnamed
-                            </span>
-                          ) : null}
                         </span>
                       )}
                       {m.venue && <span className="t-venue">📍 {m.venue}</span>}
