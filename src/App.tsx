@@ -56,6 +56,11 @@ type TournamentMatch = {
   time: string
   venue: string | null
   status: 'finished' | 'scheduled'
+  // Named goals from TheSportsDB's timeline, plus how many goals it couldn't
+  // name — their timelines are partial, and a short list without that count
+  // reads as a bug rather than a source limit.
+  scorers?: { name: string; minute: number | null; home: boolean }[]
+  unnamedGoals?: number
 }
 type Standing = {
   team: string
@@ -1037,12 +1042,36 @@ export default function App() {
                           : ''}
                       </span>
                       <span className="t-match">
-                        <Flag name={m.home} size="w20" /> {m.home}
+                        <Flag name={m.home} size="w20" />
+                        <button type="button" className="t-team" onClick={() => setSquadTeam(m.home)}>
+                          {m.home}
+                        </button>
                         <strong className="t-score">
                           {m.status === 'finished' ? `${m.homeScore}–${m.awayScore}` : m.time || 'v'}
                         </strong>
-                        {m.away} <Flag name={m.away} size="w20" />
+                        <button type="button" className="t-team" onClick={() => setSquadTeam(m.away)}>
+                          {m.away}
+                        </button>
+                        <Flag name={m.away} size="w20" />
                       </span>
+                      {m.scorers && m.scorers.length > 0 && (
+                        <span className="t-scorers">
+                          {m.scorers.map((g, i) => (
+                            <span className="t-goal" key={`${m.id}-${i}`}>
+                              ⚽ {g.name}
+                              {g.minute != null && <em> {g.minute}'</em>}
+                            </span>
+                          ))}
+                          {m.unnamedGoals ? (
+                            <span
+                              className="t-goal t-goal-unknown"
+                              title="TheSportsDB's timeline doesn't name every goal in this match"
+                            >
+                              +{m.unnamedGoals} unnamed
+                            </span>
+                          ) : null}
+                        </span>
+                      )}
                       {m.venue && <span className="t-venue">📍 {m.venue}</span>}
                     </li>
                   ))}

@@ -1691,9 +1691,49 @@ header h1 .flame {
   font-variant-numeric: tabular-nums;
 }
 .tour-list .t-venue {
+  /* Pinned to the top row: the scorer row below spans the full width, and
+     without this the venue gets auto-placed into the narrow date column. */
+  grid-column: 3;
+  grid-row: 1;
   font-size: 0.75rem;
   color: var(--muted);
   text-align: right;
+}
+/* Team names open the squad, same as the Teams panel — a nation you just saw
+   play is the one you want to look up. */
+.tour-list .t-team {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-bottom: 1px dotted transparent;
+}
+.tour-list .t-team:hover,
+.tour-list .t-team:focus-visible {
+  color: var(--arc);
+  border-bottom-color: currentColor;
+}
+/* Scorers sit on their own row under the fixture, aligned to the match column. */
+.tour-list .t-scorers {
+  grid-column: 2 / -1;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.7rem;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.tour-list .t-goal em {
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.tour-list .t-goal-unknown {
+  opacity: 0.6;
+  font-style: italic;
+  cursor: help;
 }
 @media (max-width: 899px) {
   .tour-list li {
