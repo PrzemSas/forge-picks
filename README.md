@@ -5,7 +5,7 @@ Built for **Superteam Earn × TxODDS** — _Consumer & Fan Experiences_ track.
 
 > Call a match outcome, watch the game unfold live, and climb the Forge Board as results settle in real time.
 
-**▶ Live demo: <https://forge-picks.vercel.app>**
+**▶ Live demo: <https://forge.gorweld.com>**
 
 ![Forge Picks — live World Cup fan picks](docs/forge-picks.png)
 
@@ -14,14 +14,16 @@ Built for **Superteam Earn × TxODDS** — _Consumer & Fan Experiences_ track.
 - **Live hero** — the featured match with flags, real venue, live score and a 0–90' progress bar.
 - **Pick & settle** — call home or away; picks resolve against the real result for **+10 forge points**.
 - **Final Forecast** — pick the champion (+50) and runner-up (+25); settles after the MetLife final on 19 July, with FIFA prize-pool context ($871M — $50M champion / $33M runner-up).
-- **Match history** — finished matches are archived client-side (the TxLINE feed is a rolling window of upcoming games), with score, goal timeline and your pick verdict — points never expire.
+- **Match history** — served from `/api/history`, so it's identical on every device and keeps growing even with the app closed. Score, goal timeline, your pick verdict — points never expire. It fills from finished fixtures in the TxLINE window, so between rounds — when the feed only carries upcoming games — the section stays hidden rather than showing an empty shell.
+- **Tournament** — the full bracket by round plus a team-progress ranking: who reached how far, who went out when.
 - **Live match stats** — corners and cards straight from the TxLINE event feed.
-- **Goal timeline** — minutes captured live as goals happen; scorer names & clubs in demo mode, Transfermarkt lookup links.
+- **Goal timeline** — each goal's minute is stamped as it happens while you're watching, because the feed only carries a minute for the most recent goal. Scorer names are joined from TheSportsDB's match timeline where that fixture exists there, and degrade to team-only where it doesn't — the TxLINE feed returns empty scorer fields. Demo mode shows the full detail (names, clubs, minutes) with Transfermarkt lookup links.
 - **Teams & squads** — every nation in the feed, tap for its squad (players, positions, photos).
-- **Forge Board + Share** — you vs rival typers, reshuffles at full time; share your forge to X.
+- **Forge Board + Share** — you vs rival typers, reshuffles at full time; a mini board sits right under the featured match, so the goal and your jump up the ranking land in the same eyeline. Share your forge as a rendered card.
 - **Real venues** — BC Place, AT&T Stadium, MetLife… joined from TheSportsDB (TxLINE carries no venues).
 - **Forge & arena styling** — animated embers, colosseum arches, FIFA sponsor wall.
 - **Real-time** — polls TxLINE every 2s; a goal fires a banner, a score pop and a hero flash.
+- **Installable** — a PWA with a network-first service worker: always fresh online, still readable offline.
 
 ## Powered by TxLINE (TxODDS)
 
@@ -38,7 +40,7 @@ The app runs fully in **mock/demo mode** with no tokens, then switches to live d
 
 ## Stack
 
-React 19 · Vite · TypeScript · Express (dev API proxy that keeps TxLINE tokens off the browser). No heavy UI dependencies.
+React 19 · Vite · TypeScript · Vercel serverless `api/*` in production, Express for the same routes in dev — both share `lib/txline.mjs`, and both keep TxLINE tokens off the browser. No heavy UI dependencies.
 
 ## Quick start (mock mode — no tokens needed)
 
@@ -68,7 +70,7 @@ The badge flips from **● Demo replay** to **● Live data**.
 ## Hackathon checklist
 
 - [x] Public repo
-- [x] Deployed URL — <https://forge-picks.vercel.app>
+- [x] Deployed URL — <https://forge.gorweld.com>
 - [x] Live TxLINE data (devnet — real World Cup feed, on-chain subscription)
 - [x] Demo video ≤ 5 min — https://youtu.be/H9vczXHdnFs
 - [x] Brief doc — [`docs/HACKATHON-SUBMISSION.md`](docs/HACKATHON-SUBMISSION.md) + [`docs/VIDEO-UPLOAD.txt`](docs/VIDEO-UPLOAD.txt)
